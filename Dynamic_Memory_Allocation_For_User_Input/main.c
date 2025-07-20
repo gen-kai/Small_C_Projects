@@ -11,23 +11,23 @@ typedef unsigned int u_int;
 typedef struct
 {
     u_int inputSize;
-    char *p_inputBuffer;
+    char* p_inputBuffer;
 }
 user_input;
 
-static bool GetUserInput(FILE *p_inputFile, user_input **p_p_userInput);
-static bool ReallocateBiggerBuffer(user_input **p_p_userInput);
-static bool AllocateInputBuffer(user_input **p_p_userInput);
+static bool GetUserInput(FILE* p_inputFile, user_input** p_p_userInput);
+static bool ReallocateBiggerBuffer(user_input** p_p_userInput);
+static bool AllocateInputBuffer(user_input** p_p_userInput);
 
-int main(u_int argCount, char *argValues[])
+int main(u_int argCount, char* argValues[])
 {
     if (argCount != 2)
     {
         printf("Usage: main.exe filename.ext");
         return 1;
     }
-    
-    FILE *p_inputFile = fopen(argValues[1], "rb");
+
+    FILE* p_inputFile = fopen(argValues[1], "rb");
     if (p_inputFile == NULL)
     {
         printf("Couldn't open input file!\n");
@@ -35,7 +35,7 @@ int main(u_int argCount, char *argValues[])
     }
 
 
-    user_input *p_userInput = calloc(1, sizeof(user_input));
+    user_input* p_userInput = calloc(1, sizeof(user_input));
     if (p_userInput == NULL)
     {
         fclose(p_inputFile);
@@ -65,7 +65,7 @@ int main(u_int argCount, char *argValues[])
             free(p_userInput->p_inputBuffer);
             p_userInput->p_inputBuffer = NULL;
         }
-        
+
         fclose(p_inputFile);
         free(p_userInput);
         p_userInput = NULL;
@@ -95,7 +95,7 @@ int main(u_int argCount, char *argValues[])
     return 0;
 }
 
-static bool GetUserInput(FILE *p_inputFile, user_input **p_p_userInput)
+static bool GetUserInput(FILE* p_inputFile, user_input** p_p_userInput)
 {
     char inputChar = getc(p_inputFile);
     u_int charIterator = 0;
@@ -142,7 +142,7 @@ static bool GetUserInput(FILE *p_inputFile, user_input **p_p_userInput)
     return true;
 }
 
-static bool ReallocateBiggerBuffer(user_input **p_p_userInput)
+static bool ReallocateBiggerBuffer(user_input** p_p_userInput)
 {
     if ((*p_p_userInput)->inputSize >= INITIAL_SIZE
         && (*p_p_userInput)->inputSize < INITIAL_SIZE * 4)
@@ -184,9 +184,9 @@ static bool ReallocateBiggerBuffer(user_input **p_p_userInput)
     return true;
 }
 
-static bool AllocateInputBuffer(user_input **p_p_userInput)
+static bool AllocateInputBuffer(user_input** p_p_userInput)
 {
-    char *p_tmpBuffer = (*p_p_userInput)->p_inputBuffer;
+    char* p_tmpBuffer = (*p_p_userInput)->p_inputBuffer;
 
     if ((*p_p_userInput)->inputSize == INITIAL_SIZE)
     {
