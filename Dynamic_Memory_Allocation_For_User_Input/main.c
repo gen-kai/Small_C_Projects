@@ -11,7 +11,7 @@ typedef unsigned int u_int;
 typedef struct
 {
     u_int inputSize;
-    char *p_userInputBuffer;
+    char *p_inputBuffer;
 }
 user_input;
 
@@ -60,10 +60,10 @@ int main(u_int argCount, char *argValues[])
 
     if (!GetUserInput(p_inputFile, &p_userInput))
     {
-        if (p_userInput->p_userInputBuffer != NULL)
+        if (p_userInput->p_inputBuffer != NULL)
         {
-            free(p_userInput->p_userInputBuffer);
-            p_userInput->p_userInputBuffer = NULL;
+            free(p_userInput->p_inputBuffer);
+            p_userInput->p_inputBuffer = NULL;
         }
         
         fclose(p_inputFile);
@@ -75,15 +75,15 @@ int main(u_int argCount, char *argValues[])
     }
 
 
-    printf("Your input: %s\n", p_userInput->p_userInputBuffer);
-    printf("Your input's length: %ju\n", strlen(p_userInput->p_userInputBuffer));
+    printf("Your input: %s\n", p_userInput->p_inputBuffer);
+    printf("Your input's length: %ju\n", strlen(p_userInput->p_inputBuffer));
     printf("Input buffer length: %u\n", p_userInput->inputSize);
 
 
-    if (p_userInput->p_userInputBuffer != NULL)
+    if (p_userInput->p_inputBuffer != NULL)
     {
-        free(p_userInput->p_userInputBuffer);
-        p_userInput->p_userInputBuffer = NULL;
+        free(p_userInput->p_inputBuffer);
+        p_userInput->p_inputBuffer = NULL;
     }
 
 
@@ -104,7 +104,7 @@ static bool GetUserInput(FILE *p_inputFile, user_input **p_p_userInput)
     {
         if (charIterator < (*p_p_userInput)->inputSize)
         {
-            (*p_p_userInput)->p_userInputBuffer[charIterator] = inputChar;
+            (*p_p_userInput)->p_inputBuffer[charIterator] = inputChar;
         }
         else
         {
@@ -114,7 +114,7 @@ static bool GetUserInput(FILE *p_inputFile, user_input **p_p_userInput)
             }
 
 
-            (*p_p_userInput)->p_userInputBuffer[charIterator] = inputChar;
+            (*p_p_userInput)->p_inputBuffer[charIterator] = inputChar;
         }
 
 
@@ -125,7 +125,7 @@ static bool GetUserInput(FILE *p_inputFile, user_input **p_p_userInput)
 
     if (charIterator < (*p_p_userInput)->inputSize)
     {
-        (*p_p_userInput)->p_userInputBuffer[charIterator] = '\0';
+        (*p_p_userInput)->p_inputBuffer[charIterator] = '\0';
     }
     else
     {
@@ -135,7 +135,7 @@ static bool GetUserInput(FILE *p_inputFile, user_input **p_p_userInput)
         }
 
 
-        (*p_p_userInput)->p_userInputBuffer[charIterator] = '\0';
+        (*p_p_userInput)->p_inputBuffer[charIterator] = '\0';
     }
 
 
@@ -186,12 +186,12 @@ static bool ReallocateBiggerBuffer(user_input **p_p_userInput)
 
 static bool AllocateInputBuffer(user_input **p_p_userInput)
 {
-    char *p_tmpBuffer = (*p_p_userInput)->p_userInputBuffer;
+    char *p_tmpBuffer = (*p_p_userInput)->p_inputBuffer;
 
     if ((*p_p_userInput)->inputSize == INITIAL_SIZE)
     {
-        (*p_p_userInput)->p_userInputBuffer = calloc(1, INITIAL_SIZE);
-        if ((*p_p_userInput)->p_userInputBuffer == NULL)
+        (*p_p_userInput)->p_inputBuffer = calloc(1, INITIAL_SIZE);
+        if ((*p_p_userInput)->p_inputBuffer == NULL)
         {
             printf("Couldn't allocate buffer for user input!\n");
             return false;
@@ -202,8 +202,8 @@ static bool AllocateInputBuffer(user_input **p_p_userInput)
         p_tmpBuffer = realloc(p_tmpBuffer, (*p_p_userInput)->inputSize);
         if (p_tmpBuffer == NULL)
         {
-            free((*p_p_userInput)->p_userInputBuffer);
-            (*p_p_userInput)->p_userInputBuffer = NULL;
+            free((*p_p_userInput)->p_inputBuffer);
+            (*p_p_userInput)->p_inputBuffer = NULL;
 
 
             printf("Couldn't allocate bigger buffer of size %u for user input!\n", (*p_p_userInput)->inputSize);
@@ -211,7 +211,7 @@ static bool AllocateInputBuffer(user_input **p_p_userInput)
         }
 
 
-        (*p_p_userInput)->p_userInputBuffer = p_tmpBuffer;
+        (*p_p_userInput)->p_inputBuffer = p_tmpBuffer;
     }
 
 
