@@ -190,7 +190,7 @@ static bool AllocateInputBuffer(user_input** p_p_userInput)
 
     if ((*p_p_userInput)->inputBufferSize == INITIAL_SIZE)
     {
-        (*p_p_userInput)->p_inputBuffer = calloc(1, INITIAL_SIZE);
+        (*p_p_userInput)->p_inputBuffer = malloc(INITIAL_SIZE);
         if ((*p_p_userInput)->p_inputBuffer == NULL)
         {
             printf("Couldn't allocate buffer for user input!\n");
