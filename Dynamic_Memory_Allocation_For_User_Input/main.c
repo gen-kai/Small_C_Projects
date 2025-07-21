@@ -10,7 +10,7 @@ typedef unsigned int u_int;
 
 typedef struct
 {
-    u_int inputSize;
+    u_int inputBufferSize;
     char* p_inputBuffer;
 }
 user_input;
@@ -44,7 +44,7 @@ int main(u_int argCount, char* argValues[])
     }
 
 
-    p_userInput->inputSize = INITIAL_SIZE;
+    p_userInput->inputBufferSize = INITIAL_SIZE;
 
 
     if (!AllocateInputBuffer(&p_userInput))
@@ -77,7 +77,7 @@ int main(u_int argCount, char* argValues[])
 
     printf("Your input: %s\n", p_userInput->p_inputBuffer);
     printf("Your input's length: %ju\n", strlen(p_userInput->p_inputBuffer));
-    printf("Input buffer length: %u\n", p_userInput->inputSize);
+    printf("Input buffer length: %u\n", p_userInput->inputBufferSize);
 
 
     if (p_userInput->p_inputBuffer != NULL)
@@ -102,7 +102,7 @@ static bool GetUserInput(FILE* p_inputFile, user_input** p_p_userInput)
 
     while (inputChar != EOF)
     {
-        if (charIterator < (*p_p_userInput)->inputSize)
+        if (charIterator < (*p_p_userInput)->inputBufferSize)
         {
             (*p_p_userInput)->p_inputBuffer[charIterator] = inputChar;
         }
@@ -123,7 +123,7 @@ static bool GetUserInput(FILE* p_inputFile, user_input** p_p_userInput)
     }
 
 
-    if (charIterator < (*p_p_userInput)->inputSize)
+    if (charIterator < (*p_p_userInput)->inputBufferSize)
     {
         (*p_p_userInput)->p_inputBuffer[charIterator] = '\0';
     }
@@ -144,28 +144,28 @@ static bool GetUserInput(FILE* p_inputFile, user_input** p_p_userInput)
 
 static bool ReallocateBiggerBuffer(user_input** p_p_userInput)
 {
-    if ((*p_p_userInput)->inputSize >= INITIAL_SIZE
-        && (*p_p_userInput)->inputSize < INITIAL_SIZE * 4)
+    if ((*p_p_userInput)->inputBufferSize >= INITIAL_SIZE
+        && (*p_p_userInput)->inputBufferSize < INITIAL_SIZE * 4)
     {
-        (*p_p_userInput)->inputSize *= 2;
+        (*p_p_userInput)->inputBufferSize *= 2;
         if (!AllocateInputBuffer(p_p_userInput))
         {
             return false;
         }
     }
-    else if ((*p_p_userInput)->inputSize >= INITIAL_SIZE * 4
-             && (*p_p_userInput)->inputSize < INITIAL_SIZE * 8)
+    else if ((*p_p_userInput)->inputBufferSize >= INITIAL_SIZE * 4
+             && (*p_p_userInput)->inputBufferSize < INITIAL_SIZE * 8)
     {
-        (*p_p_userInput)->inputSize *= 2;
+        (*p_p_userInput)->inputBufferSize *= 2;
         if (!AllocateInputBuffer(p_p_userInput))
         {
             return false;
         }
     }
-    else if ((*p_p_userInput)->inputSize >= INITIAL_SIZE * 8
-             && (*p_p_userInput)->inputSize < INITIAL_SIZE * 16)
+    else if ((*p_p_userInput)->inputBufferSize >= INITIAL_SIZE * 8
+             && (*p_p_userInput)->inputBufferSize < INITIAL_SIZE * 16)
     {
-        (*p_p_userInput)->inputSize *= 1.5;
+        (*p_p_userInput)->inputBufferSize *= 1.5;
         if (!AllocateInputBuffer(p_p_userInput))
         {
             return false;
@@ -173,7 +173,7 @@ static bool ReallocateBiggerBuffer(user_input** p_p_userInput)
     }
     else
     {
-        (*p_p_userInput)->inputSize *= 1.2;
+        (*p_p_userInput)->inputBufferSize *= 1.2;
         if (!AllocateInputBuffer(p_p_userInput))
         {
             return false;
@@ -188,7 +188,7 @@ static bool AllocateInputBuffer(user_input** p_p_userInput)
 {
     char* p_tmpBuffer = (*p_p_userInput)->p_inputBuffer;
 
-    if ((*p_p_userInput)->inputSize == INITIAL_SIZE)
+    if ((*p_p_userInput)->inputBufferSize == INITIAL_SIZE)
     {
         (*p_p_userInput)->p_inputBuffer = calloc(1, INITIAL_SIZE);
         if ((*p_p_userInput)->p_inputBuffer == NULL)
@@ -199,14 +199,14 @@ static bool AllocateInputBuffer(user_input** p_p_userInput)
     }
     else
     {
-        p_tmpBuffer = realloc(p_tmpBuffer, (*p_p_userInput)->inputSize);
+        p_tmpBuffer = realloc(p_tmpBuffer, (*p_p_userInput)->inputBufferSize);
         if (p_tmpBuffer == NULL)
         {
             free((*p_p_userInput)->p_inputBuffer);
             (*p_p_userInput)->p_inputBuffer = NULL;
 
 
-            printf("Couldn't allocate bigger buffer of size %u for user input!\n", (*p_p_userInput)->inputSize);
+            printf("Couldn't allocate bigger buffer of size %u for user input!\n", (*p_p_userInput)->inputBufferSize);
             return false;
         }
 
