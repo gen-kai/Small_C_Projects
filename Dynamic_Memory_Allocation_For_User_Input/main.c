@@ -16,7 +16,7 @@ typedef struct
 user_input;
 
 static bool GetUserInput(FILE* p_inputFile, user_input** p_p_userInput);
-static bool ReallocateBuffer(user_input** p_p_userInput);
+static bool ReallocateInputBuffer(user_input** p_p_userInput);
 static bool AllocateInputBuffer(user_input** p_p_userInput);
 
 int main(u_int argCount, char* argValues[])
@@ -108,7 +108,7 @@ static bool GetUserInput(FILE* p_inputFile, user_input** p_p_userInput)
         }
         else
         {
-            if (!ReallocateBuffer(p_p_userInput))
+            if (!ReallocateInputBuffer(p_p_userInput))
             {
                 return false;
             }
@@ -129,7 +129,7 @@ static bool GetUserInput(FILE* p_inputFile, user_input** p_p_userInput)
     }
     else
     {
-        if (!ReallocateBuffer(p_p_userInput))
+        if (!ReallocateInputBuffer(p_p_userInput))
         {
             return false;
         }
@@ -142,7 +142,7 @@ static bool GetUserInput(FILE* p_inputFile, user_input** p_p_userInput)
     return true;
 }
 
-static bool ReallocateBuffer(user_input** p_p_userInput)
+static bool ReallocateInputBuffer(user_input** p_p_userInput)
 {
     if ((*p_p_userInput)->inputBufferSize >= INITIAL_SIZE
         && (*p_p_userInput)->inputBufferSize < INITIAL_SIZE * 8)
