@@ -9,7 +9,8 @@
 
 typedef struct
 {
-    uint32_t currentInputBufferSize;
+    uint32_t inputBufferSize;
+    uint32_t inputBufferCapacity;
     char* p_inputBuffer;
 }
 user_input;
@@ -50,8 +51,9 @@ int main(uint32_t argCount, char* argValues[])
 
 
     printf("Your input: %s\n", userInput.p_inputBuffer);
-    printf("Your input's length: %ju\n", strnlen(userInput.p_inputBuffer, userInput.currentInputBufferSize));
-    printf("Input buffer length: %u\n", userInput.currentInputBufferSize);
+    printf("Your input's length: %ju\n",
+           strnlen(userInput.p_inputBuffer, userInput.inputBufferSize));
+    printf("Input buffer length: %u\n", userInput.inputBufferSize);
 
 
     FreeAllocatedMemory(p_inputFile, &userInput);
@@ -61,24 +63,26 @@ int main(uint32_t argCount, char* argValues[])
 static bool GetUserInput(FILE* p_inputFile, user_input* p_userInput)
 {
     char inputChar = getc(p_inputFile);
-    uint32_t charIterator = 0;
 
     while (inputChar != EOF)
     {
-        if (!SetBufferChar(inputChar, charIterator, p_userInput))
+        if (!SetBufferChar(inputChar,
+                           p_userInput->inputBufferSize - p_userInput->inputBufferCapacity,
+                           p_userInput))
         {
             return false;
         }
 
 
-        p_userInput->p_inputBuffer[charIterator] = inputChar;
+        p_userInput->p_inputBuffer[p_userInput->inputBufferSize - p_userInput->inputBufferCapacity] = inputChar;
 
 
         inputChar = getc(p_inputFile);
-        charIterator++;
     }
 
-    if (!SetBufferChar('\0', charIterator, p_userInput))
+    if (!SetBufferChar('\0',
+                       p_userInput->inputBufferSize - p_userInput->inputBufferCapacity,
+                       p_userInput))
     {
         return false;
     }
@@ -91,7 +95,7 @@ static user_input CreateUserInput(desiredBufferSize)
 {
     user_input userInput;
 
-    userInput.currentInputBufferSize = 0;
+    userInput.inputBufferSize = 0;
     userInput.p_inputBuffer = NULL;
 
 
@@ -107,7 +111,7 @@ static user_input CreateUserInput(desiredBufferSize)
 
 static bool AllocateInputBuffer(user_input* p_userInput, uint32_t desiredInputBufferSize)
 {
-    if (p_userInput->currentInputBufferSize < desiredInputBufferSize)
+    if (p_userInput->inputBufferSize < desiredInputBufferSize)
     {
         if (desiredInputBufferSize == INITIAL_SIZE)
         {
@@ -119,7 +123,8 @@ static bool AllocateInputBuffer(user_input* p_userInput, uint32_t desiredInputBu
             }
 
 
-            p_userInput->currentInputBufferSize = INITIAL_SIZE;
+            p_userInput->inputBufferSize = INITIAL_SIZE;
+            p_userInput->inputBufferCapacity = INITIAL_SIZE;
         }
         else
         {
@@ -128,13 +133,16 @@ static bool AllocateInputBuffer(user_input* p_userInput, uint32_t desiredInputBu
             p_tmpBuffer = realloc(p_tmpBuffer, desiredInputBufferSize);
             if (p_tmpBuffer == NULL)
             {
-                printf("Couldn't allocate bigger buffer of size %u for user input!\n", p_userInput->currentInputBufferSize);
+                printf("Couldn't allocate bigger buffer of size %u for user input!\n",
+                       p_userInput->inputBufferSize);
                 return false;
             }
 
 
             p_userInput->p_inputBuffer = p_tmpBuffer;
-            p_userInput->currentInputBufferSize = desiredInputBufferSize;
+            p_userInput->inputBufferCapacity = desiredInputBufferSize
+                - p_userInput->inputBufferSize;
+            p_userInput->inputBufferSize = desiredInputBufferSize;
         }
     }
 
@@ -144,25 +152,25 @@ static bool AllocateInputBuffer(user_input* p_userInput, uint32_t desiredInputBu
 
 static bool ReallocateInputBuffer(user_input* p_userInput)
 {
-    if (p_userInput->currentInputBufferSize >= INITIAL_SIZE
-        && p_userInput->currentInputBufferSize < INITIAL_SIZE * 8)
+    if (p_userInput->inputBufferSize >= INITIAL_SIZE
+        && p_userInput->inputBufferSize < INITIAL_SIZE * 8)
     {
-        if (!AllocateInputBuffer(p_userInput, p_userInput->currentInputBufferSize * 2))
+        if (!AllocateInputBuffer(p_userInput, p_userInput->inputBufferSize * 2))
         {
             return false;
         }
     }
-    else if (p_userInput->currentInputBufferSize >= INITIAL_SIZE * 8
-             && p_userInput->currentInputBufferSize < INITIAL_SIZE * 16)
+    else if (p_userInput->inputBufferSize >= INITIAL_SIZE * 8
+             && p_userInput->inputBufferSize < INITIAL_SIZE * 16)
     {
-        if (!AllocateInputBuffer(p_userInput, p_userInput->currentInputBufferSize * 1.5))
+        if (!AllocateInputBuffer(p_userInput, p_userInput->inputBufferSize * 1.5))
         {
             return false;
         }
     }
     else
     {
-        if (!AllocateInputBuffer(p_userInput, p_userInput->currentInputBufferSize * 1.2))
+        if (!AllocateInputBuffer(p_userInput, p_userInput->inputBufferSize * 1.2))
         {
             return false;
         }
@@ -174,9 +182,10 @@ static bool ReallocateInputBuffer(user_input* p_userInput)
 
 static bool SetBufferChar(char charToSet, uint32_t charIndex, user_input* p_userInput)
 {
-    if (charIndex < p_userInput->currentInputBufferSize)
+    if (p_userInput->inputBufferCapacity != 0)
     {
         p_userInput->p_inputBuffer[charIndex] = charToSet;
+        p_userInput->inputBufferCapacity--;
     }
     else
     {
@@ -187,6 +196,7 @@ static bool SetBufferChar(char charToSet, uint32_t charIndex, user_input* p_user
 
 
         p_userInput->p_inputBuffer[charIndex] = charToSet;
+        p_userInput->inputBufferCapacity--;
     }
 
 
