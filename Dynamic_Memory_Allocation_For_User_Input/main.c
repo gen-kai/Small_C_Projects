@@ -145,16 +145,7 @@ static bool GetUserInput(FILE* p_inputFile, user_input** p_p_userInput)
 static bool ReallocateBiggerBuffer(user_input** p_p_userInput)
 {
     if ((*p_p_userInput)->inputBufferSize >= INITIAL_SIZE
-        && (*p_p_userInput)->inputBufferSize < INITIAL_SIZE * 4)
-    {
-        (*p_p_userInput)->inputBufferSize *= 2;
-        if (!AllocateInputBuffer(p_p_userInput))
-        {
-            return false;
-        }
-    }
-    else if ((*p_p_userInput)->inputBufferSize >= INITIAL_SIZE * 4
-             && (*p_p_userInput)->inputBufferSize < INITIAL_SIZE * 8)
+        && (*p_p_userInput)->inputBufferSize < INITIAL_SIZE * 8)
     {
         (*p_p_userInput)->inputBufferSize *= 2;
         if (!AllocateInputBuffer(p_p_userInput))
