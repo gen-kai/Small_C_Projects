@@ -1,4 +1,5 @@
 #include <stdbool.h>
+#include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -6,11 +7,9 @@
 #define INITIAL_SIZE 2000U
 #define MAX_UINT32_TO_STR_BASE10_COUNT 10U
 
-typedef unsigned int u_int;
-
 typedef struct
 {
-    u_int currentInputBufferSize;
+    uint32_t currentInputBufferSize;
     char* p_inputBuffer;
 }
 user_input;
@@ -18,10 +17,10 @@ user_input;
 static bool GetUserInput(FILE* p_inputFile, user_input* p_userInput);
 static user_input CreateUserInput(desiredBufferSize);
 static bool ReallocateInputBuffer(user_input* p_userInput);
-static bool AllocateInputBuffer(user_input* p_userInput, u_int desiredInputbufferSize);
+static bool AllocateInputBuffer(user_input* p_userInput, uint32_t desiredInputbufferSize);
 static void FreeAllocatedMemory(FILE* p_inputFile, user_input* p_userInput);
 
-int main(u_int argCount, char* argValues[])
+int main(uint32_t argCount, char* argValues[])
 {
     if (argCount != 2)
     {
@@ -61,7 +60,7 @@ int main(u_int argCount, char* argValues[])
 static bool GetUserInput(FILE* p_inputFile, user_input* p_userInput)
 {
     char inputChar = getc(p_inputFile);
-    u_int charIterator = 0;
+    uint32_t charIterator = 0;
 
     while (inputChar != EOF)
     {
@@ -123,7 +122,7 @@ static user_input CreateUserInput(desiredBufferSize)
     return userInput;
 }
 
-static bool AllocateInputBuffer(user_input* p_userInput, u_int desiredInputBufferSize)
+static bool AllocateInputBuffer(user_input* p_userInput, uint32_t desiredInputBufferSize)
 {
     if (p_userInput->currentInputBufferSize < desiredInputBufferSize)
     {
