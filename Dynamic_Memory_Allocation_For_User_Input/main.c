@@ -16,8 +16,9 @@ user_input;
 
 static bool GetUserInput(FILE* p_inputFile, user_input* p_userInput);
 static user_input CreateUserInput(desiredBufferSize);
-static bool ReallocateInputBuffer(user_input* p_userInput);
 static bool AllocateInputBuffer(user_input* p_userInput, uint32_t desiredInputbufferSize);
+static bool ReallocateInputBuffer(user_input* p_userInput);
+static bool SetBufferChar(char charToSet, uint32_t charIndex,user_input* p_userInput);
 static void FreeAllocatedMemory(FILE* p_inputFile, user_input* p_userInput);
 
 int main(uint32_t argCount, char* argValues[])
@@ -64,40 +65,22 @@ static bool GetUserInput(FILE* p_inputFile, user_input* p_userInput)
 
     while (inputChar != EOF)
     {
-        if (charIterator < p_userInput->currentInputBufferSize)
+        if (!SetBufferChar(inputChar, charIterator, p_userInput))
         {
-            p_userInput->p_inputBuffer[charIterator] = inputChar;
+            return false;
         }
-        else
-        {
-            if (!ReallocateInputBuffer(p_userInput))
-            {
-                return false;
-            }
 
 
-            p_userInput->p_inputBuffer[charIterator] = inputChar;
-        }
+        p_userInput->p_inputBuffer[charIterator] = inputChar;
 
 
         inputChar = getc(p_inputFile);
         charIterator++;
     }
 
-
-    if (charIterator < p_userInput->currentInputBufferSize)
+    if (!SetBufferChar('\0', charIterator, p_userInput))
     {
-        p_userInput->p_inputBuffer[charIterator] = '\0';
-    }
-    else
-    {
-        if (!ReallocateInputBuffer(p_userInput))
-        {
-            return false;
-        }
-
-
-        p_userInput->p_inputBuffer[charIterator] = '\0';
+        return false;
     }
 
 
@@ -183,6 +166,27 @@ static bool ReallocateInputBuffer(user_input* p_userInput)
         {
             return false;
         }
+    }
+
+
+    return true;
+}
+
+static bool SetBufferChar(char charToSet, uint32_t charIndex, user_input* p_userInput)
+{
+    if (charIndex < p_userInput->currentInputBufferSize)
+    {
+        p_userInput->p_inputBuffer[charIndex] = charToSet;
+    }
+    else
+    {
+        if (!ReallocateInputBuffer(p_userInput))
+        {
+            return false;
+        }
+
+
+        p_userInput->p_inputBuffer[charIndex] = charToSet;
     }
 
 
