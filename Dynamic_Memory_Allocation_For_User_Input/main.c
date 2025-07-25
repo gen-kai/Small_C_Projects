@@ -168,12 +168,16 @@ static bool ReallocateInputBuffer(user_input* p_userInput)
             return false;
         }
     }
-    else
+    else if (((uint64_t) p_userInput->inputBufferSize) * 1.2 <= INT32_MAX)
     {
         if (!AllocateInputBuffer(p_userInput, p_userInput->inputBufferSize * 1.2))
         {
             return false;
         }
+    }
+    else
+    {
+        return false;
     }
 
 
