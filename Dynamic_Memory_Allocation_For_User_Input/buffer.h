@@ -9,6 +9,7 @@
 
 typedef struct
 {
+    bool isBufferAllocated;
     uint32_t inputBufferSize;
     uint32_t inputBufferCapacity;
     char* p_inputBuffer;

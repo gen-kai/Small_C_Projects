@@ -18,7 +18,12 @@ int main(uint32_t argCount, char* argValues[])
 
 
     user_input userInput = CreateUserInput(INITIAL_SIZE);
-
+    if (!userInput.isBufferAllocated)
+    {
+        printf("Couldn't create buffer structure!\n");
+        FreeAllocatedMemory(NULL, &userInput);
+        return 2;
+    }
 
     FILE* p_inputFile = fopen(argValues[1], "rb");
     if (p_inputFile == NULL)

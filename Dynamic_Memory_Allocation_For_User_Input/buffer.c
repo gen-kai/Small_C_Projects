@@ -12,14 +12,7 @@ user_input CreateUserInput(uint32_t desiredBufferSize)
     userInput.inputBufferSize = 0;
     userInput.p_inputBuffer = NULL;
 
-
-    if (!AllocateInputBuffer(&userInput, INITIAL_SIZE))
-    {
-        FreeAllocatedMemory(NULL, &userInput);
-        exit(2);
-    }
-
-
+    AllocateInputBuffer(&userInput, INITIAL_SIZE);
     return userInput;
 }
 
@@ -32,11 +25,13 @@ bool AllocateInputBuffer(user_input* p_userInput, uint32_t desiredInputBufferSiz
             p_userInput->p_inputBuffer = malloc(INITIAL_SIZE);
             if (p_userInput->p_inputBuffer == NULL)
             {
+                p_userInput->isBufferAllocated = false;
                 printf("Couldn't allocate buffer for user input!\n");
                 return false;
             }
 
 
+            p_userInput->isBufferAllocated = true;
             p_userInput->inputBufferSize = INITIAL_SIZE;
             p_userInput->inputBufferCapacity = INITIAL_SIZE;
         }
@@ -47,6 +42,7 @@ bool AllocateInputBuffer(user_input* p_userInput, uint32_t desiredInputBufferSiz
             p_tmpBuffer = realloc(p_tmpBuffer, desiredInputBufferSize);
             if (p_tmpBuffer == NULL)
             {
+                p_userInput->isBufferAllocated = false;
                 printf("Couldn't allocate bigger buffer of size %u for user input!\n",
                        p_userInput->inputBufferSize);
                 return false;
@@ -54,6 +50,7 @@ bool AllocateInputBuffer(user_input* p_userInput, uint32_t desiredInputBufferSiz
 
 
             p_userInput->p_inputBuffer = p_tmpBuffer;
+            p_userInput->isBufferAllocated = true;
             p_userInput->inputBufferCapacity = desiredInputBufferSize
                 - p_userInput->inputBufferSize;
             p_userInput->inputBufferSize = desiredInputBufferSize;
