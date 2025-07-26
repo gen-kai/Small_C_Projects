@@ -95,11 +95,11 @@ bool ReallocateInputBuffer(user_input* p_userInput)
     return true;
 }
 
-bool SetBufferChar(char charToSet, uint32_t charIndex, user_input* p_userInput)
+bool AppendBuffer(char charToSet, user_input* p_userInput)
 {
     if (p_userInput->inputBufferCapacity != 0)
     {
-        p_userInput->p_inputBuffer[charIndex] = charToSet;
+        p_userInput->p_inputBuffer[p_userInput->inputBufferSize - p_userInput->inputBufferCapacity] = charToSet;
         p_userInput->inputBufferCapacity--;
     }
     else
@@ -109,9 +109,15 @@ bool SetBufferChar(char charToSet, uint32_t charIndex, user_input* p_userInput)
             return false;
         }
 
-
-        p_userInput->p_inputBuffer[charIndex] = charToSet;
-        p_userInput->inputBufferCapacity--;
+        if (p_userInput->inputBufferCapacity != 0)
+        {
+            p_userInput->p_inputBuffer[p_userInput->inputBufferSize - p_userInput->inputBufferCapacity] = charToSet;
+            p_userInput->inputBufferCapacity--;
+        }
+        else
+        {
+            return false;
+        }
     }
 
 

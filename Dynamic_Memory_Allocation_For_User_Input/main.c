@@ -57,24 +57,16 @@ static bool GetUserInput(FILE* p_inputFile, user_input* p_userInput)
 
     while (inputChar != EOF)
     {
-        if (!SetBufferChar(inputChar,
-                           p_userInput->inputBufferSize - p_userInput->inputBufferCapacity,
-                           p_userInput))
+        if (!AppendBuffer(inputChar, p_userInput))
         {
             return false;
         }
 
 
-        p_userInput->p_inputBuffer[p_userInput->inputBufferSize - p_userInput->inputBufferCapacity]
-            = inputChar;
-
-
         inputChar = getc(p_inputFile);
     }
 
-    if (!SetBufferChar('\0',
-                       p_userInput->inputBufferSize - p_userInput->inputBufferCapacity,
-                       p_userInput))
+    if (!AppendBuffer('\0', p_userInput))
     {
         return false;
     }
