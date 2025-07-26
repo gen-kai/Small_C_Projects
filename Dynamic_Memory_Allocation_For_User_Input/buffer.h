@@ -2,7 +2,6 @@
 
 #include <stdbool.h>
 #include <stdint.h>
-#include <stdio.h>
 
 #define INITIAL_SIZE 2000U
 #define MAX_UINT32_TO_STR_BASE10_COUNT 10U
