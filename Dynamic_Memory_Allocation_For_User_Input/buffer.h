@@ -9,14 +9,14 @@
 typedef struct
 {
     bool isBufferAllocated;
-    uint32_t inputBufferSize;
-    uint32_t inputBufferCapacity;
+    uint32_t bufferSize;
+    uint32_t bufferCapacity;
     char* p_inputBuffer;
 }
 user_input;
 
 user_input CreateUserInput(uint32_t desiredBufferSize);
-bool AllocateInputBuffer(user_input* p_userInput, uint32_t desiredInputbufferSize);
+bool AllocateInputBuffer(user_input* p_userInput, uint32_t desiredBufferSize);
 bool ReallocateInputBuffer(user_input* p_userInput);
 bool AppendBuffer(char charToSet, user_input* p_userInput);
 void FreeInputBuffer(user_input* p_userInput);
