@@ -20,4 +20,4 @@ user_input CreateUserInput(uint32_t desiredBufferSize);
 bool AllocateInputBuffer(user_input* p_userInput, uint32_t desiredInputbufferSize);
 bool ReallocateInputBuffer(user_input* p_userInput);
 bool AppendBuffer(char charToSet, user_input* p_userInput);
-void FreeAllocatedMemory(FILE* p_inputFile, user_input* p_userInput);
+void FreeInputBuffer(user_input* p_userInput);

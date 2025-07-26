@@ -124,14 +124,8 @@ bool AppendBuffer(char charToSet, user_input* p_userInput)
     return true;
 }
 
-void FreeAllocatedMemory(FILE* p_inputFile, user_input* p_userInput)
+void FreeInputBuffer(user_input* p_userInput)
 {
-    if (p_inputFile != NULL)
-    {
-        fclose(p_inputFile);
-    }
-
-
     if (p_userInput->p_inputBuffer != NULL)
     {
         free(p_userInput->p_inputBuffer);

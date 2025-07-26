@@ -21,7 +21,7 @@ int main(uint32_t argCount, char* argValues[])
     if (!userInput.isBufferAllocated)
     {
         printf("Couldn't create buffer structure!\n");
-        FreeAllocatedMemory(NULL, &userInput);
+        FreeInputBuffer(&userInput);
         return 2;
     }
 
@@ -29,14 +29,22 @@ int main(uint32_t argCount, char* argValues[])
     if (p_inputFile == NULL)
     {
         printf("Couldn't open input file!\n");
-        FreeAllocatedMemory(p_inputFile, &userInput);
+        FreeInputBuffer(&userInput);
         return 3;
     }
 
 
     if (!GetUserInput(p_inputFile, &userInput))
     {
-        FreeAllocatedMemory(p_inputFile, &userInput);
+        FreeInputBuffer(&userInput);
+
+        if (p_inputFile != NULL)
+        {
+            fclose(p_inputFile);
+            p_inputFile = NULL;
+        }
+
+
         return 4;
     }
 
@@ -47,7 +55,15 @@ int main(uint32_t argCount, char* argValues[])
     printf("Input buffer length: %u\n", userInput.inputBufferSize);
 
 
-    FreeAllocatedMemory(p_inputFile, &userInput);
+    FreeInputBuffer(&userInput);
+
+    if (p_inputFile != NULL)
+    {
+        fclose(p_inputFile);
+        p_inputFile = NULL;
+    }
+
+
     return 0;
 }
 
