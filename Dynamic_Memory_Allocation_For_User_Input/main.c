@@ -1,5 +1,4 @@
 #include <stdbool.h>
-#include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -8,7 +7,7 @@
 
 static bool GetUserInput(FILE* p_inputFile, user_input* p_userInput);
 
-int main(uint32_t argCount, char* argValues[])
+int main(int argCount, char* argValues[])
 {
     if (argCount != 2)
     {
