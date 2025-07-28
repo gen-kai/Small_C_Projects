@@ -10,7 +10,7 @@ int main(int argCount, char* argValues[])
     OBJECT_ATTRIBUTES objectAttributes = {0};
     UNICODE_STRING fileName = {0};
 
-    HMODULE ntdllHandle = LoadLibrary(L"ntdll");
+    HMODULE ntdllHandle = GetModuleHandle(L"ntdll");
     if (ntdllHandle == NULL)
     {
         return 1;
@@ -30,9 +30,7 @@ int main(int argCount, char* argValues[])
 
     InitializeObjectAttributes(&objectAttributes, &fileName, OBJ_CASE_INSENSITIVE, NULL, NULL);
 
-    IO_STATUS_BLOCK ioStatusBlock;
-    memset(&ioStatusBlock, 0, sizeof(IO_STATUS_BLOCK));
-
+    IO_STATUS_BLOCK ioStatusBlock = {0};
     LARGE_INTEGER allocationSize = {0};
 
     ULONG fileAttributes = FILE_ATTRIBUTE_NORMAL;
@@ -57,5 +55,5 @@ int main(int argCount, char* argValues[])
         eaLength);
 
 
-    return 0;
+    return syscallSatus;
 }
