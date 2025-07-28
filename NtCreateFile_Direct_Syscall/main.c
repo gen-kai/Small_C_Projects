@@ -41,7 +41,7 @@ int main(int argCount, char* argValues[])
     ULONG eaLength = 0;
 
 
-    NTSTATUS syscallSatus = SyscallNtCreateFile(
+    NTSTATUS syscallStatus = SyscallNtCreateFile(
         &fileHandle,
         desiredAccess,
         &objectAttributes,
@@ -55,5 +55,5 @@ int main(int argCount, char* argValues[])
         eaLength);
 
 
-    return syscallSatus;
+    return syscallStatus;
 }
