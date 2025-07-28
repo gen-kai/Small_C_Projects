@@ -10,7 +10,7 @@ int main(int argCount, char* argValues[])
     OBJECT_ATTRIBUTES objectAttributes = {0};
     UNICODE_STRING fileName = {0};
 
-    HMODULE ntdllHandle = GetModuleHandle(L"ntdll");
+    HMODULE ntdllHandle = GetModuleHandle(L"ntdll.dll");
     if (ntdllHandle == NULL)
     {
         return 1;
