@@ -7,6 +7,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Dynamic_Memory_Allocation_F
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "NtCreateFile_Direct_Syscall", "NtCreateFile_Direct_Syscall\NtCreateFile_Direct_Syscall.vcxproj", "{64292454-9E1D-4072-94E5-BF17C86792CB}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Simple_TCP_Echo_Server", "Simple_TCP_Echo_Server\Simple_TCP_Echo_Server.vcxproj", "{0B5CA58D-AD3C-4F29-8CE0-09FB2D8562CF}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x64 = Debug|x64
@@ -31,6 +33,14 @@ Global
 		{64292454-9E1D-4072-94E5-BF17C86792CB}.Release|x64.Build.0 = Release|x64
 		{64292454-9E1D-4072-94E5-BF17C86792CB}.Release|x86.ActiveCfg = Release|Win32
 		{64292454-9E1D-4072-94E5-BF17C86792CB}.Release|x86.Build.0 = Release|Win32
+		{0B5CA58D-AD3C-4F29-8CE0-09FB2D8562CF}.Debug|x64.ActiveCfg = Debug|x64
+		{0B5CA58D-AD3C-4F29-8CE0-09FB2D8562CF}.Debug|x64.Build.0 = Debug|x64
+		{0B5CA58D-AD3C-4F29-8CE0-09FB2D8562CF}.Debug|x86.ActiveCfg = Debug|Win32
+		{0B5CA58D-AD3C-4F29-8CE0-09FB2D8562CF}.Debug|x86.Build.0 = Debug|Win32
+		{0B5CA58D-AD3C-4F29-8CE0-09FB2D8562CF}.Release|x64.ActiveCfg = Release|x64
+		{0B5CA58D-AD3C-4F29-8CE0-09FB2D8562CF}.Release|x64.Build.0 = Release|x64
+		{0B5CA58D-AD3C-4F29-8CE0-09FB2D8562CF}.Release|x86.ActiveCfg = Release|Win32
+		{0B5CA58D-AD3C-4F29-8CE0-09FB2D8562CF}.Release|x86.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
