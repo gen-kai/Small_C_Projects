@@ -11,7 +11,7 @@
 #define MESSAGE_MAXIMUM_LENGTH 100U
 
 bool IsSocketReady(WSAPOLLFD* saPollFdStructure);
-int EchoLoop(SOCKET listenSocket, SOCKET connectionSocket);
+int ConnectionLoop(SOCKET listenSocket, SOCKET connectionSocket);
 
 int main(int argCount, char* argValues[])
 {
@@ -226,7 +226,7 @@ int main(int argCount, char* argValues[])
         }
 
 
-        int echoLoopResult = EchoLoop(listenSocket, connectionSocket);
+        int echoLoopResult = ConnectionLoop(listenSocket, connectionSocket);
         if (echoLoopResult == 10)
         {
             printf("recv failed: %d\n", WSAGetLastError());
@@ -317,7 +317,7 @@ bool IsSocketReady(WSAPOLLFD* p_wsaPollFdStructure)
     // the function returns True only if both isSocketReadyToRead and isSocketReadyToWrite are TRUE
 }
 
-int EchoLoop(SOCKET listenSocket, SOCKET connectionSocket)
+int ConnectionLoop(SOCKET listenSocket, SOCKET connectionSocket)
 {
     char receivedMessage[MESSAGE_MAXIMUM_LENGTH] = {0};
     int bytesReceived = 0;
