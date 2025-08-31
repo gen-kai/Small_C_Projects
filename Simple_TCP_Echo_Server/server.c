@@ -1,17 +1,9 @@
 #include <stdbool.h>
 #include <stdio.h>
 #include <winsock2.h>
-#include <ws2tcpip.h>
+#include "server.h"
 
 #pragma comment(lib, "ws2_32.lib")
-
-#define LISTEN_SOCKET_COUNT 1U
-#define SOCKET_POLL_TIMEOUT 10U
-#define LISTEN_SOCKET_PORT 62390U
-#define MESSAGE_MAXIMUM_LENGTH 100U
-
-bool IsSocketReady(WSAPOLLFD* saPollFdStructure);
-int ConnectionLoop(SOCKET listenSocket, SOCKET connectionSocket);
 
 int main(int argCount, char* argValues[])
 {
@@ -34,9 +26,9 @@ int main(int argCount, char* argValues[])
 
     SOCKET listenSocket = socket
     (
-        AF_INET,
-        SOCK_STREAM,
-        IPPROTO_TCP
+        SOCKET_FAMILY,
+        SOCKET_TYPE,
+        SOCKET_PROTOCOL
     );
     if (listenSocket == INVALID_SOCKET)
     {
@@ -117,19 +109,18 @@ int main(int argCount, char* argValues[])
     printf("Socket is ready!\n");
 
 
-    SOCKADDR_IN sockaddrStructure =
+    const SOCKADDR_IN socketAddress =
     {
-        .sin_family = AF_INET,
-        .sin_port = htons(LISTEN_SOCKET_PORT),
-        .sin_addr = INADDR_ANY,
-        .sin_zero = 0
+        .sin_family = SOCKET_FAMILY,
+        .sin_port = htons(SOCKET_PORT),
+        .sin_addr.s_addr = SOCKET_ADDRESS
     };
 
     int bindResult = bind
     (
         listenSocket,
-        &sockaddrStructure,
-        sizeof(sockaddrStructure)
+        &socketAddress,
+        sizeof(socketAddress)
     );
     if (bindResult == SOCKET_ERROR)
     {
@@ -154,7 +145,7 @@ int main(int argCount, char* argValues[])
     int listenResult = listen
     (
         listenSocket,
-        SOMAXCONN_HINT(1)
+        SOMAXCONN_HINT(SOCKET_MAXIMUM_CONNECTIONS)
     );
     if (listenResult == SOCKET_ERROR)
     {
@@ -176,11 +167,11 @@ int main(int argCount, char* argValues[])
     printf("Socket was switched into listen state!\n");
 
 
+    SOCKADDR remoteAddress;
+    int remoteAddressLength = sizeof(remoteAddress);
+
     while (true)
     {
-        SOCKADDR remoteAddress;
-        int remoteAddressLength = sizeof(remoteAddress);
-
         SOCKET connectionSocket = accept
         (
             listenSocket,
@@ -204,30 +195,43 @@ int main(int argCount, char* argValues[])
         }
         else
         {
-            printf("New connection was established!\n");
+            printf("New connection established!\n");
 
 
-            char remoteIpString[15];
+            WCHAR remoteIpString[REMOTE_ADDRESS_STRING_MAX_SIZE + 1] = {0};
+            // + 1 is for the null terminator
+            DWORD remoteIpStringSize = REMOTE_ADDRESS_STRING_MAX_SIZE;
+            // we copy REMOTE_ADDRESS_STRING_MAX_SIZE * sizeof(WCHAR)
+            // bytes of information + NULL char
+            // WSAAddressToStringW also copies port number into the remoteIpString
+            // so REMOTE_ADDRESS_STRING_MAX_SIZE is
+            // REMOTE_IP_STRING_MAX_SIZE + 1 (: symbol) + REMOTE_PORT_STRING_MAX_SIZE
+            // this gives us 15 + 1 + 5 = 21 symbols
 
-            if (inet_ntop
+            if (WSAAddressToStringW
             (
-                AF_INET,
-                &remoteAddress.sa_data[2],
-                &remoteIpString,
-                sizeof(remoteIpString)
-            ) == NULL)
+                &remoteAddress,
+                (DWORD) remoteAddressLength,
+                NULL,
+                (LPWSTR) &remoteIpString,
+                &remoteIpStringSize
+            ) == SOCKET_ERROR)
             {
-                printf("Couldn't convert remote IP to string!\n");
+                printf
+                (
+                    "Couldn't convert remote IP to string! "
+                    "Error code: %d\n", WSAGetLastError()
+                );
             }
             else
             {
-                printf("Established connection with the host %s\n", remoteIpString);
+                wprintf(L"Remote host: %s\n", remoteIpString);
             }
         }
 
 
-        int echoLoopResult = ConnectionLoop(listenSocket, connectionSocket);
-        if (echoLoopResult == 10)
+        int connectionLoopResult = ConnectionLoop(listenSocket, connectionSocket);
+        if (connectionLoopResult == 10)
         {
             printf("recv failed: %d\n", WSAGetLastError());
 
@@ -257,7 +261,7 @@ int main(int argCount, char* argValues[])
             WSACleanup();
             return 10;
         }
-        else if (echoLoopResult == 11)
+        else if (connectionLoopResult == 11)
         {
             printf("recv failed: %d\n", WSAGetLastError());
 
@@ -306,7 +310,7 @@ int main(int argCount, char* argValues[])
     return 0;
 };
 
-bool IsSocketReady(WSAPOLLFD* p_wsaPollFdStructure)
+bool IsSocketReady(PWSAPOLLFD p_wsaPollFdStructure)
 {
     bool isSocketReadyToRead = (p_wsaPollFdStructure->revents | POLLRDNORM) == POLLRDNORM;
     // if bitwise AND of revents and POLLRDNORM is True - isSocketReadyToRead is True
@@ -368,4 +372,7 @@ int ConnectionLoop(SOCKET listenSocket, SOCKET connectionSocket)
         }
     }
     while (bytesReceived > 0);
+
+
+    return 0;
 }
