@@ -3,12 +3,24 @@
 #include <winsock2.h>
 #include "server.h"
 
+
 #pragma comment(lib, "ws2_32.lib")
+
 
 int main(int argCount, char* argValues[])
 {
     WORD wsaVersion = MAKEWORD(2, 2);
     WSADATA wsaData;
+    SOCKET listeningSocket = INVALID_SOCKET;
+    SOCKADDR_IN socketAddress =
+    {
+        .sin_family = SOCKET_FAMILY,
+        .sin_port = htons(SOCKET_PORT),
+        .sin_addr.s_addr = SOCKET_ADDRESS
+    };
+    SOCKADDR remoteAddress;
+    int remoteAddressLength = sizeof(remoteAddress);
+
 
     int wsaStartupResult = WSAStartup(wsaVersion, &wsaData);
     if (wsaStartupResult != 0)
@@ -24,13 +36,13 @@ int main(int argCount, char* argValues[])
     }
 
 
-    SOCKET listenSocket = socket
+    listeningSocket = socket
     (
         SOCKET_FAMILY,
         SOCKET_TYPE,
         SOCKET_PROTOCOL
     );
-    if (listenSocket == INVALID_SOCKET)
+    if (listeningSocket == INVALID_SOCKET)
     {
         printf("Socket creation failed with error %d\n", WSAGetLastError());
         WSACleanup();
@@ -41,84 +53,9 @@ int main(int argCount, char* argValues[])
     printf("Unnamed socket was created!\n");
 
 
-    /*    WSAPOLLFD wsaPollFdStructure =
-        {
-            .fd = listenSocket,
-            .events = POLLRDNORM | POLLWRNORM,
-            .revents = 0
-        };
-
-        int socketStatus = WSAPoll
-        (
-            &wsaPollFdStructure,
-            LISTEN_SOCKET_COUNT,
-            SOCKET_POLL_TIMEOUT
-        );
-        if (socketStatus == INVALID_SOCKET)
-        {
-            printf("Socket poll was unsuccessful. Error code: %d\n", WSAGetLastError());
-
-
-            int closesocketResult = closesocket(listenSocket);
-            if (closesocketResult == SOCKET_ERROR)
-            {
-                printf("Socket close was unsuccessful. Error code: %d\n", WSAGetLastError());
-            }
-
-
-            WSACleanup();
-            return 4;
-        }
-        else if (socketStatus != LISTEN_SOCKET_COUNT)
-        {
-            printf("Socket poll timeout!\n");
-
-
-            int closesocketResult = closesocket(listenSocket);
-            if (closesocketResult == SOCKET_ERROR)
-            {
-                printf("Socket close was unsuccessful. Error code: %d\n", WSAGetLastError());
-            }
-
-
-            WSACleanup();
-            return 5;
-        }
-
-
-        printf("Socket availability was polled!\n");
-
-
-        if (!IsSocketReady(&wsaPollFdStructure))
-        {
-            printf("Socket is not ready!\n");
-
-
-            int closesocketResult = closesocket(listenSocket);
-            if (closesocketResult == SOCKET_ERROR)
-            {
-                printf("Socket close was unsuccessful. Error code: %d\n", WSAGetLastError());
-            }
-
-
-            WSACleanup();
-            return 6;
-        }*/
-
-
-    printf("Socket is ready!\n");
-
-
-    const SOCKADDR_IN socketAddress =
-    {
-        .sin_family = SOCKET_FAMILY,
-        .sin_port = htons(SOCKET_PORT),
-        .sin_addr.s_addr = SOCKET_ADDRESS
-    };
-
     int bindResult = bind
     (
-        listenSocket,
+        listeningSocket,
         &socketAddress,
         sizeof(socketAddress)
     );
@@ -127,7 +64,7 @@ int main(int argCount, char* argValues[])
         printf("Socket bind was unsuccessfull. Error code: %d\n", WSAGetLastError());
 
 
-        int closesocketResult = closesocket(listenSocket);
+        int closesocketResult = closesocket(listeningSocket);
         if (closesocketResult == SOCKET_ERROR)
         {
             printf("Socket close was unsuccessful. Error code: %d\n", WSAGetLastError());
@@ -144,7 +81,7 @@ int main(int argCount, char* argValues[])
 
     int listenResult = listen
     (
-        listenSocket,
+        listeningSocket,
         SOMAXCONN_HINT(SOCKET_MAXIMUM_CONNECTIONS)
     );
     if (listenResult == SOCKET_ERROR)
@@ -152,7 +89,7 @@ int main(int argCount, char* argValues[])
         printf("Socket listen was unsuccessfull. Error code: %d\n", WSAGetLastError());
 
 
-        int closesocketResult = closesocket(listenSocket);
+        int closesocketResult = closesocket(listeningSocket);
         if (closesocketResult == SOCKET_ERROR)
         {
             printf("Socket close was unsuccessful. Error code: %d\n", WSAGetLastError());
@@ -167,14 +104,11 @@ int main(int argCount, char* argValues[])
     printf("Socket was switched into listen state!\n");
 
 
-    SOCKADDR remoteAddress;
-    int remoteAddressLength = sizeof(remoteAddress);
-
     while (true)
     {
         SOCKET connectionSocket = accept
         (
-            listenSocket,
+            listeningSocket,
             &remoteAddress,
             &remoteAddressLength
         );
@@ -183,7 +117,7 @@ int main(int argCount, char* argValues[])
             printf("Connection accept was unsuccessfull. Error code: %d\n", WSAGetLastError());
 
 
-            int closesocketResult = closesocket(listenSocket);
+            int closesocketResult = closesocket(listeningSocket);
             if (closesocketResult == SOCKET_ERROR)
             {
                 printf("Socket close was unsuccessful. Error code: %d\n", WSAGetLastError());
@@ -230,13 +164,13 @@ int main(int argCount, char* argValues[])
         }
 
 
-        int connectionLoopResult = ConnectionLoop(listenSocket, connectionSocket);
+        int connectionLoopResult = ConnectionLoop(listeningSocket, connectionSocket);
         if (connectionLoopResult == 10)
         {
             printf("recv failed: %d\n", WSAGetLastError());
 
 
-            int closesocketResult = closesocket(listenSocket);
+            int closesocketResult = closesocket(listeningSocket);
             if (closesocketResult == SOCKET_ERROR)
             {
                 printf
@@ -266,7 +200,7 @@ int main(int argCount, char* argValues[])
             printf("recv failed: %d\n", WSAGetLastError());
 
 
-            int closesocketResult = closesocket(listenSocket);
+            int closesocketResult = closesocket(listeningSocket);
             if (closesocketResult == SOCKET_ERROR)
             {
                 printf
@@ -294,7 +228,7 @@ int main(int argCount, char* argValues[])
     };
 
 
-    int closesocketResult = closesocket(listenSocket);
+    int closesocketResult = closesocket(listeningSocket);
     if (closesocketResult == SOCKET_ERROR)
     {
         printf("Socket close was unsuccessful. Error code: %d\n", WSAGetLastError());
@@ -310,16 +244,6 @@ int main(int argCount, char* argValues[])
     return 0;
 };
 
-bool IsSocketReady(PWSAPOLLFD p_wsaPollFdStructure)
-{
-    bool isSocketReadyToRead = (p_wsaPollFdStructure->revents | POLLRDNORM) == POLLRDNORM;
-    // if bitwise AND of revents and POLLRDNORM is True - isSocketReadyToRead is True
-    bool isSocketReadyToWrite = (p_wsaPollFdStructure->revents | POLLWRNORM) == POLLWRNORM;
-    // if bitwise AND of revents and POLLWRNORM is True - isSocketReadyToWrite is True
-
-    return isSocketReadyToRead && isSocketReadyToWrite;
-    // the function returns True only if both isSocketReadyToRead and isSocketReadyToWrite are TRUE
-}
 
 int ConnectionLoop(SOCKET listenSocket, SOCKET connectionSocket)
 {

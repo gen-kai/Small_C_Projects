@@ -1,6 +1,7 @@
 #pragma once
 #include <winsock2.h>
 
+
 #define SOCKET_FAMILY AF_INET
 #define SOCKET_TYPE SOCK_STREAM
 #define SOCKET_PROTOCOL IPPROTO_TCP
@@ -15,5 +16,5 @@
 // IP address size + : + port size
 #define MESSAGE_MAXIMUM_LENGTH 100U
 
-bool IsSocketReady(PWSAPOLLFD saPollFdStructure);
+
 int ConnectionLoop(SOCKET listenSocket, SOCKET connectionSocket);
