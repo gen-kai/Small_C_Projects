@@ -64,11 +64,8 @@ int main(int argCount, char* argValues[])
         printf("Socket bind was unsuccessfull. Error code: %d\n", WSAGetLastError());
 
 
-        int closesocketResult = closesocket(listeningSocket);
-        if (closesocketResult == SOCKET_ERROR)
-        {
-            printf("Socket close was unsuccessful. Error code: %d\n", WSAGetLastError());
-        }
+        printf("Listening socket:\n");
+        SocketDispose(listeningSocket);
 
 
         WSACleanup();
@@ -89,11 +86,8 @@ int main(int argCount, char* argValues[])
         printf("Socket listen was unsuccessfull. Error code: %d\n", WSAGetLastError());
 
 
-        int closesocketResult = closesocket(listeningSocket);
-        if (closesocketResult == SOCKET_ERROR)
-        {
-            printf("Socket close was unsuccessful. Error code: %d\n", WSAGetLastError());
-        }
+        printf("Listening socket:\n");
+        SocketDispose(listeningSocket);
 
 
         WSACleanup();
@@ -117,11 +111,8 @@ int main(int argCount, char* argValues[])
             printf("Connection accept was unsuccessfull. Error code: %d\n", WSAGetLastError());
 
 
-            int closesocketResult = closesocket(listeningSocket);
-            if (closesocketResult == SOCKET_ERROR)
-            {
-                printf("Socket close was unsuccessful. Error code: %d\n", WSAGetLastError());
-            }
+            printf("Listening socket:\n");
+            SocketDispose(listeningSocket);
 
 
             WSACleanup();
@@ -153,7 +144,7 @@ int main(int argCount, char* argValues[])
             {
                 printf
                 (
-                    "Couldn't convert remote IP to string! "
+                    "Couldn't convert remote IP to string. "
                     "Error code: %d\n", WSAGetLastError()
                 );
             }
@@ -164,80 +155,42 @@ int main(int argCount, char* argValues[])
         }
 
 
-        int connectionLoopResult = ConnectionLoop(listeningSocket, connectionSocket);
+        int connectionLoopResult = ConnectionLoop(connectionSocket);
         if (connectionLoopResult == 10)
         {
             printf("recv failed: %d\n", WSAGetLastError());
 
 
-            int closesocketResult = closesocket(listeningSocket);
-            if (closesocketResult == SOCKET_ERROR)
-            {
-                printf
-                (
-                    "Listen socket close was unsuccessful. Error code: %d\n",
-                    WSAGetLastError()
-                );
-            }
+            printf("Connection socket:\n");
+            SocketDispose(connectionSocket);
 
 
-            closesocketResult = closesocket(connectionSocket);
-            if (closesocketResult == SOCKET_ERROR)
-            {
-                printf
-                (
-                    "Listen socket close was unsuccessful. Error code: %d\n",
-                    WSAGetLastError()
-                );
-            }
-
-
-            WSACleanup();
-            return 10;
+            continue;
         }
         else if (connectionLoopResult == 11)
         {
-            printf("recv failed: %d\n", WSAGetLastError());
+            printf("send failed: %d\n", WSAGetLastError());
 
 
-            int closesocketResult = closesocket(listeningSocket);
-            if (closesocketResult == SOCKET_ERROR)
-            {
-                printf
-                (
-                    "Listen socket close was unsuccessful. Error code: %d\n",
-                    WSAGetLastError()
-                );
-            }
+            printf("Connection socket:\n");
+            SocketDispose(connectionSocket);
 
 
-            closesocketResult = closesocket(connectionSocket);
-            if (closesocketResult == SOCKET_ERROR)
-            {
-                printf
-                (
-                    "Listen socket close was unsuccessful. Error code: %d\n",
-                    WSAGetLastError()
-                );
-            }
+            continue;
+        }
+        else if (connectionLoopResult == 0)
+        {
+            printf("Connection socket:\n");
+            SocketDispose(connectionSocket);
 
 
-            WSACleanup();
-            return 11;
+            continue;
         }
     };
 
 
-    int closesocketResult = closesocket(listeningSocket);
-    if (closesocketResult == SOCKET_ERROR)
-    {
-        printf("Socket close was unsuccessful. Error code: %d\n", WSAGetLastError());
-        WSACleanup();
-        return -1;
-    }
-
-
-    printf("Socket was closed!\n");
+    printf("Listening socket:\n");
+    SocketDispose(listeningSocket);
 
 
     WSACleanup();
@@ -245,7 +198,7 @@ int main(int argCount, char* argValues[])
 };
 
 
-int ConnectionLoop(SOCKET listenSocket, SOCKET connectionSocket)
+int ConnectionLoop(SOCKET connectionSocket)
 {
     char receivedMessage[MESSAGE_MAXIMUM_LENGTH] = {0};
     int bytesReceived = 0;
@@ -277,26 +230,73 @@ int ConnectionLoop(SOCKET listenSocket, SOCKET connectionSocket)
             }
             else if (bytesReceived == 0)
             {
-                printf("Connection closed\n");
+                printf("Connection closed!\n");
                 return 0;
             }
             else
             {
-                return 10;
+                return 11;
             }
         }
         else if (bytesReceived == 0)
         {
-            printf("Connection closed\n");
+            printf("Connection closed!\n");
             return 0;
         }
         else
         {
-            return 11;
+            return 10;
         }
     }
     while (bytesReceived > 0);
 
 
     return 0;
+}
+
+
+int SocketDispose(SOCKET socketToDispose)
+{
+    bool isSocketShut = false, isSocketClosed = false;
+
+    int shutdownResult = shutdown(socketToDispose, SD_BOTH);
+    if (shutdownResult != SOCKET_ERROR)
+    {
+        printf("    Socket was shutdown!\n");
+        isSocketShut = true;
+    }
+    else
+    {
+        printf("    Socket shutdown error. Error code: %d!\n", WSAGetLastError());
+    }
+
+
+    int closesocketResult = closesocket(socketToDispose);
+    if (closesocketResult != SOCKET_ERROR)
+    {
+        printf("    Socket was closed!\n");
+        isSocketClosed = true;
+    }
+    else
+    {
+        printf("    Socket close error. Error code: %d!\n", WSAGetLastError());
+    }
+
+
+    if (isSocketShut && !isSocketClosed)
+    {
+        return 1;
+    }
+    else if (!isSocketShut && isSocketClosed)
+    {
+        return 2;
+    }
+    else if (!isSocketShut && !isSocketClosed)
+    {
+        return 3;
+    }
+    else if (isSocketShut && isSocketClosed)
+    {
+        return 0;
+    }
 }

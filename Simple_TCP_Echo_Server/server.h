@@ -17,4 +17,5 @@
 #define MESSAGE_MAXIMUM_LENGTH 100U
 
 
-int ConnectionLoop(SOCKET listenSocket, SOCKET connectionSocket);
+int ConnectionLoop(SOCKET connectionSocket);
+int SocketDispose(SOCKET socketToDispose);
