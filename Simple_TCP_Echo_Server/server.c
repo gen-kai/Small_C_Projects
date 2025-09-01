@@ -26,11 +26,15 @@ int main(int argCount, char* argValues[])
     if (wsaStartupResult != 0)
     {
         printf("WSA Startup failed with error %d\n", wsaStartupResult);
+
+
         return 1;
     }
     if (LOBYTE(wsaData.wVersion) != 2 || HIBYTE(wsaData.wVersion) != 2)
     {
         printf("Could not find a usable version of Winsock.dll\n");
+
+
         WSACleanup();
         return 2;
     }
@@ -45,6 +49,8 @@ int main(int argCount, char* argValues[])
     if (listeningSocket == INVALID_SOCKET)
     {
         printf("Socket creation failed with error %d\n", WSAGetLastError());
+
+
         WSACleanup();
         return 3;
     }
