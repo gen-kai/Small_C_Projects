@@ -6,20 +6,20 @@
 
 #pragma comment(lib, "ws2_32.lib")
 
-
 int main(int argCount, char* argValues[])
 {
-    WORD wsaVersion = MAKEWORD(2, 2);
+    WORD    wsaVersion = MAKEWORD(2, 2);
     WSADATA wsaData;
-    SOCKET listeningSocket = INVALID_SOCKET;
-    SOCKADDR_IN socketAddress =
-    {
-        .sin_family = SOCKET_FAMILY,
-        .sin_port = htons(SOCKET_PORT),
+    SOCKET  listeningSocket = INVALID_SOCKET;
+
+    SOCKADDR_IN socketAddress = {
+        .sin_family      = SOCKET_FAMILY,
+        .sin_port        = htons(SOCKET_PORT),
         .sin_addr.s_addr = SOCKET_ADDRESS
     };
+
     SOCKADDR remoteAddress;
-    int remoteAddressLength = sizeof(remoteAddress);
+    int      remoteAddressLength = sizeof(remoteAddress);
 
 
     int wsaStartupResult = WSAStartup(wsaVersion, &wsaData);
@@ -40,12 +40,7 @@ int main(int argCount, char* argValues[])
     }
 
 
-    listeningSocket = socket
-    (
-        SOCKET_FAMILY,
-        SOCKET_TYPE,
-        SOCKET_PROTOCOL
-    );
+    listeningSocket = socket(SOCKET_FAMILY, SOCKET_TYPE, SOCKET_PROTOCOL);
     if (listeningSocket == INVALID_SOCKET)
     {
         printf("Socket creation failed with error %d\n", WSAGetLastError());
@@ -59,15 +54,17 @@ int main(int argCount, char* argValues[])
     printf("Unnamed socket was created!\n");
 
 
-    int bindResult = bind
-    (
+    int bindResult = bind(
         listeningSocket,
         &socketAddress,
         sizeof(socketAddress)
     );
     if (bindResult == SOCKET_ERROR)
     {
-        printf("Socket bind was unsuccessfull. Error code: %d\n", WSAGetLastError());
+        printf(
+            "Socket bind was unsuccessfull. Error code: %d\n",
+            WSAGetLastError()
+        );
 
 
         printf("Listening socket:\n");
@@ -82,14 +79,16 @@ int main(int argCount, char* argValues[])
     printf("Socket was bound!\n");
 
 
-    int listenResult = listen
-    (
+    int listenResult = listen(
         listeningSocket,
         SOMAXCONN_HINT(SOCKET_MAXIMUM_CONNECTIONS)
     );
     if (listenResult == SOCKET_ERROR)
     {
-        printf("Socket listen was unsuccessfull. Error code: %d\n", WSAGetLastError());
+        printf(
+            "Socket listen was unsuccessfull. Error code: %d\n",
+            WSAGetLastError()
+        );
 
 
         printf("Listening socket:\n");
@@ -106,15 +105,18 @@ int main(int argCount, char* argValues[])
 
     while (true)
     {
-        SOCKET connectionSocket = accept
-        (
+        SOCKET connectionSocket = accept(
             listeningSocket,
             &remoteAddress,
             &remoteAddressLength
         );
         if (connectionSocket == INVALID_SOCKET)
         {
-            printf("Connection accept was unsuccessfull. Error code: %d\n", WSAGetLastError());
+            printf(
+                "Connection accept was unsuccessfull. Error code: "
+                "%d\n",
+                WSAGetLastError()
+            );
 
 
             printf("Listening socket:\n");
@@ -134,24 +136,25 @@ int main(int argCount, char* argValues[])
             DWORD remoteIpStringSize = REMOTE_ADDRESS_STRING_MAX_SIZE;
             // we copy REMOTE_ADDRESS_STRING_MAX_SIZE * sizeof(WCHAR)
             // bytes of information + NULL char
-            // WSAAddressToStringW also copies port number into the remoteIpString
-            // so REMOTE_ADDRESS_STRING_MAX_SIZE is
-            // REMOTE_IP_STRING_MAX_SIZE + 1 (: symbol) + REMOTE_PORT_STRING_MAX_SIZE
-            // this gives us 15 + 1 + 5 = 21 symbols
+            // WSAAddressToStringW also copies port number into the
+            // remoteIpString so REMOTE_ADDRESS_STRING_MAX_SIZE is
+            // REMOTE_IP_STRING_MAX_SIZE + 1 (: symbol) +
+            // REMOTE_PORT_STRING_MAX_SIZE this gives us 15 + 1 + 5 =
+            // 21 symbols
 
-            if (WSAAddressToStringW
-            (
-                &remoteAddress,
-                (DWORD) remoteAddressLength,
-                NULL,
-                (LPWSTR) &remoteIpString,
-                &remoteIpStringSize
-            ) == SOCKET_ERROR)
+            if (WSAAddressToStringW(
+                    &remoteAddress,
+                    (DWORD)remoteAddressLength,
+                    NULL,
+                    (LPWSTR)&remoteIpString,
+                    &remoteIpStringSize
+                )
+                == SOCKET_ERROR)
             {
-                printf
-                (
+                printf(
                     "Couldn't convert remote IP to string. "
-                    "Error code: %d\n", WSAGetLastError()
+                    "Error code: %d\n",
+                    WSAGetLastError()
                 );
             }
             else
@@ -203,16 +206,14 @@ int main(int argCount, char* argValues[])
     return 0;
 };
 
-
 int ConnectionLoop(SOCKET connectionSocket)
 {
     char receivedMessage[MESSAGE_MAXIMUM_LENGTH] = {0};
-    int bytesReceived = 0;
+    int  bytesReceived                           = 0;
 
     do
     {
-        bytesReceived = recv
-        (
+        bytesReceived = recv(
             connectionSocket,
             receivedMessage,
             MESSAGE_MAXIMUM_LENGTH,
@@ -223,8 +224,7 @@ int ConnectionLoop(SOCKET connectionSocket)
             printf("Bytes received: %d\n", bytesReceived);
 
 
-            int bytesSent = send
-            (
+            int bytesSent = send(
                 connectionSocket,
                 receivedMessage,
                 bytesReceived,
@@ -260,7 +260,6 @@ int ConnectionLoop(SOCKET connectionSocket)
     return 0;
 }
 
-
 int SocketDispose(SOCKET socketToDispose)
 {
     bool isSocketShut = false, isSocketClosed = false;
@@ -273,7 +272,10 @@ int SocketDispose(SOCKET socketToDispose)
     }
     else
     {
-        printf("    Socket shutdown error. Error code: %d!\n", WSAGetLastError());
+        printf(
+            "    Socket shutdown error. Error code: %d!\n",
+            WSAGetLastError()
+        );
     }
 
 
