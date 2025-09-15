@@ -38,5 +38,5 @@ void SocketResolveAddress(
     LPSOCKADDR p_remoteAddress,
     DWORD      remoteAddressLength
 );
-void SocketDispose(int socketIndex);
+void SocketClose(int socketIndex);
 void FreeSocketObject(int socketIndex);

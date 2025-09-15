@@ -75,7 +75,7 @@ int main(int argCount, char* argValues[])
 
 
         printf("Listening socket:\n");
-        SocketDispose(listeningSocket);
+        SocketClose(listeningSocket);
 
 
         WSACleanup();
@@ -100,7 +100,7 @@ int main(int argCount, char* argValues[])
 
 
         printf("Listening socket:\n");
-        SocketDispose(listeningSocket);
+        SocketClose(listeningSocket);
 
 
         WSACleanup();
@@ -129,7 +129,7 @@ int main(int argCount, char* argValues[])
 
 
             printf("Listening socket:\n");
-            SocketDispose(listeningSocket);
+            SocketClose(listeningSocket);
 
 
             WSACleanup();
@@ -181,7 +181,7 @@ int main(int argCount, char* argValues[])
 
 
             printf("Connection socket:\n");
-            SocketDispose(connectionSocket);
+            SocketClose(connectionSocket);
 
 
             continue;
@@ -192,7 +192,7 @@ int main(int argCount, char* argValues[])
 
 
             printf("Connection socket:\n");
-            SocketDispose(connectionSocket);
+            SocketClose(connectionSocket);
 
 
             continue;
@@ -200,7 +200,7 @@ int main(int argCount, char* argValues[])
         else if (connectionLoopResult == 0)
         {
             printf("Connection socket:\n");
-            SocketDispose(connectionSocket);
+            SocketClose(connectionSocket);
 
 
             continue;
@@ -209,7 +209,7 @@ int main(int argCount, char* argValues[])
 
 
     printf("Listening socket:\n");
-    SocketDispose(listeningSocket);
+    SocketClose(listeningSocket);
 
 
     WSACleanup();
@@ -271,7 +271,7 @@ int ConnectionLoop(SOCKET connectionSocket)
     return 0;
 }
 
-int SocketDispose(SOCKET socketToDispose)
+int SocketClose(SOCKET socketToDispose)
 {
     BOOL isSocketShut   = FALSE;
     BOOL isSocketClosed = FALSE;

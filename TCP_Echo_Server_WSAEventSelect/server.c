@@ -169,7 +169,7 @@ int main(int argCount, char* argValues[])
 
 
         printf("Listening socket:\n");
-        SocketDispose(socketCount - 1);
+        SocketClose(socketCount - 1);
 
 
         WSACleanup();
@@ -192,7 +192,7 @@ int main(int argCount, char* argValues[])
 
 
         printf("Listening socket:\n");
-        SocketDispose(socketCount - 1);
+        SocketClose(socketCount - 1);
 
 
         WSACleanup();
@@ -218,7 +218,7 @@ int main(int argCount, char* argValues[])
         );
 
         printf("Listening socket:\n");
-        SocketDispose(socketCount - 1);
+        SocketClose(socketCount - 1);
 
 
         WSACleanup();
@@ -251,7 +251,7 @@ int main(int argCount, char* argValues[])
             for (int socketIndex = 0; socketIndex < socketCount; socketIndex++)
             {
                 printf("Socket %d:\n", socketIndex);
-                SocketDispose(socketIndex);
+                SocketClose(socketIndex);
             }
 
 
@@ -284,7 +284,7 @@ int main(int argCount, char* argValues[])
             for (int socketIndex = 0; socketIndex < socketCount; socketIndex++)
             {
                 printf("Socket %d:\n", socketIndex);
-                SocketDispose(socketIndex);
+                SocketClose(socketIndex);
             }
 
 
@@ -319,6 +319,9 @@ int main(int argCount, char* argValues[])
             {
                 continue;
             }
+
+
+            printf("Current number of sockets: %d\n", socketCount);
         }
         // process FD_READ
         else if (networkEvents.lNetworkEvents & FD_READ)
@@ -378,7 +381,27 @@ int main(int argCount, char* argValues[])
         // process FD_CLOSE
         else if (networkEvents.lNetworkEvents & FD_CLOSE)
         {
-            SocketDispose(eventIndex);
+            if (networkEvents.iErrorCode[FD_CLOSE_BIT] != 0)
+            {
+                printf(
+                    "FD_CLOSE failed with error %d\n",
+                    networkEvents.iErrorCode[FD_CLOSE_BIT]
+                );
+
+
+                // exit the loop and clean up
+                break;
+            }
+            else
+            {
+                printf("FD_CLOSE was successful!\n");
+            }
+
+
+            SocketClose(eventIndex);
+
+
+            printf("Current number of sockets: %d\n", socketCount);
         }
     };
 
@@ -386,7 +409,7 @@ int main(int argCount, char* argValues[])
     for (int socketIndex = 0; socketIndex < socketCount; socketIndex++)
     {
         printf("Socket %d:\n", socketIndex);
-        SocketDispose(socketIndex);
+        SocketClose(socketIndex);
     }
 
 
@@ -438,7 +461,7 @@ int CreateSocketObject(SOCKET socketDescriptor)
     return 0;
 }
 
-void SocketDispose(int socketIndex)
+void SocketClose(int socketIndex)
 {
     int shutdownResult = shutdown(
         socketList[socketIndex]->socketDescriptor,
@@ -485,11 +508,11 @@ void FreeSocketObject(int socketIndex)
 
     if (WSACloseEvent(eventList[socketIndex]) == TRUE)
     {
-        printf("WSACloseEvent() is OK!\n\n");
+        printf("    WSACloseEvent() was successful!\n");
     }
     else
     {
-        printf("WSACloseEvent() failed!\n\n");
+        printf("    WSACloseEvent() failed!\n");
     }
 
 
@@ -637,7 +660,7 @@ int SocketAccept(int eventIndex)
         );
 
         printf("Listening socket:\n");
-        SocketDispose(socketCount - 1);
+        SocketClose(socketCount - 1);
 
 
         return 4;

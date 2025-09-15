@@ -19,4 +19,4 @@
 
 
 int ConnectionLoop(SOCKET connectionSocket);
-int SocketDispose(SOCKET socketToDispose);
+int SocketClose(SOCKET socketToDispose);
