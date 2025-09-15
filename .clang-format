@@ -136,7 +136,7 @@ InsertTrailingCommas: None
 IntegerLiteralSeparator:
   Binary: 4
   BinaryMinDigits: 5
-  Decimal: 4
+  Decimal: 3
   DecimalMinDigits: 5
   Hex: 2
   HexMinDigits: 4
@@ -151,14 +151,15 @@ PPIndentWidth: -1
 PackConstructorInitializers: NextLineOnly
 PenaltyBreakAssignment: 10000
 PenaltyBreakBeforeFirstCallParameter: 1
+PenaltyBreakBeforeMemberAccess: 10000
 PenaltyBreakComment: 100
 PenaltyBreakFirstLessLess: 1
 PenaltyBreakOpenParenthesis: 1
 PenaltyBreakScopeResolution: 1
 PenaltyBreakString: 100
-PenaltyExcessCharacter: 10000
+PenaltyExcessCharacter: 100000000
 PenaltyIndentedWhitespace: 1
-PenaltyReturnTypeOnItsOwnLine: 100
+PenaltyReturnTypeOnItsOwnLine: 10000
 PointerAlignment: Left
 QualifierAlignment: Left
 ReferenceAlignment: Right

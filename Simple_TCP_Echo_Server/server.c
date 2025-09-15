@@ -1,4 +1,3 @@
-#include <stdbool.h>
 #include <stdio.h>
 #include <winsock2.h>
 #include "server.h"
@@ -13,9 +12,9 @@ int main(int argCount, char* argValues[])
     SOCKET  listeningSocket = INVALID_SOCKET;
 
     SOCKADDR_IN socketAddress = {
-        .sin_family      = SOCKET_FAMILY,
-        .sin_port        = htons(SOCKET_PORT),
-        .sin_addr.s_addr = SOCKET_ADDRESS
+        .sin_family      = LISTENING_SOCKET_FAMILY,
+        .sin_port        = htons(LISTENING_SOCKET_PORT),
+        .sin_addr.s_addr = LISTENING_SOCKET_ADDRESS
     };
 
     SOCKADDR remoteAddress;
@@ -23,6 +22,7 @@ int main(int argCount, char* argValues[])
 
 
     int wsaStartupResult = WSAStartup(wsaVersion, &wsaData);
+
     if (wsaStartupResult != 0)
     {
         printf("WSA Startup failed with error %d\n", wsaStartupResult);
@@ -30,6 +30,7 @@ int main(int argCount, char* argValues[])
 
         return 1;
     }
+
     if (LOBYTE(wsaData.wVersion) != 2 || HIBYTE(wsaData.wVersion) != 2)
     {
         printf("Could not find a usable version of Winsock.dll\n");
@@ -40,7 +41,12 @@ int main(int argCount, char* argValues[])
     }
 
 
-    listeningSocket = socket(SOCKET_FAMILY, SOCKET_TYPE, SOCKET_PROTOCOL);
+    listeningSocket = socket(
+        LISTENING_SOCKET_FAMILY,
+        LISTENING_SOCKET_TYPE,
+        LISTENING_SOCKET_PROTOCOL
+    );
+
     if (listeningSocket == INVALID_SOCKET)
     {
         printf("Socket creation failed with error %d\n", WSAGetLastError());
@@ -56,9 +62,10 @@ int main(int argCount, char* argValues[])
 
     int bindResult = bind(
         listeningSocket,
-        &socketAddress,
+        (SOCKADDR*)&socketAddress,
         sizeof(socketAddress)
     );
+
     if (bindResult == SOCKET_ERROR)
     {
         printf(
@@ -83,6 +90,7 @@ int main(int argCount, char* argValues[])
         listeningSocket,
         SOMAXCONN_HINT(SOCKET_MAXIMUM_CONNECTIONS)
     );
+
     if (listenResult == SOCKET_ERROR)
     {
         printf(
@@ -103,13 +111,14 @@ int main(int argCount, char* argValues[])
     printf("Socket was switched into listen state!\n");
 
 
-    while (true)
+    while (TRUE)
     {
         SOCKET connectionSocket = accept(
             listeningSocket,
             &remoteAddress,
             &remoteAddressLength
         );
+
         if (connectionSocket == INVALID_SOCKET)
         {
             printf(
@@ -165,6 +174,7 @@ int main(int argCount, char* argValues[])
 
 
         int connectionLoopResult = ConnectionLoop(connectionSocket);
+
         if (connectionLoopResult == 10)
         {
             printf("recv failed: %d\n", WSAGetLastError());
@@ -219,6 +229,7 @@ int ConnectionLoop(SOCKET connectionSocket)
             MESSAGE_MAXIMUM_LENGTH,
             0
         );
+
         if (bytesReceived > 0)
         {
             printf("Bytes received: %d\n", bytesReceived);
@@ -262,13 +273,15 @@ int ConnectionLoop(SOCKET connectionSocket)
 
 int SocketDispose(SOCKET socketToDispose)
 {
-    bool isSocketShut = false, isSocketClosed = false;
+    BOOL isSocketShut   = FALSE;
+    BOOL isSocketClosed = FALSE;
 
     int shutdownResult = shutdown(socketToDispose, SD_BOTH);
+
     if (shutdownResult != SOCKET_ERROR)
     {
         printf("    Socket was shutdown!\n");
-        isSocketShut = true;
+        isSocketShut = TRUE;
     }
     else
     {
@@ -280,10 +293,11 @@ int SocketDispose(SOCKET socketToDispose)
 
 
     int closesocketResult = closesocket(socketToDispose);
+
     if (closesocketResult != SOCKET_ERROR)
     {
         printf("    Socket was closed!\n");
-        isSocketClosed = true;
+        isSocketClosed = TRUE;
     }
     else
     {
