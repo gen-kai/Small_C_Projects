@@ -22,6 +22,7 @@
         REMOTE_IP_STRING_MAX_SIZE + 1 + REMOTE_PORT_STRING_MAX_SIZE \
     ) // IP address size + : symbol + port size
 
+
 typedef struct
 {
     SOCKET socketDescriptor;
@@ -30,13 +31,23 @@ typedef struct
     WSABUF wsaBufStructure;
 } SESSION_INFO;
 
+
+int CreateListeningSocket(
+    LPSOCKADDR_IN p_listeningSocketAddress,
+    int           listeningSocketAddressLength
+);
+
 int  CreateSession(SOCKET socketDescriptor);
+void DestroySession(int socketIndex);
+
 int  SocketAccept(int socketIndex);
 int  SocketRead(int eventIndex);
 int  SocketWrite(int eventIndex);
+void SocketClose(int socketIndex);
+
 void SocketResolveAddress(
     LPSOCKADDR p_remoteAddress,
     DWORD      remoteAddressLength
 );
-void SocketClose(int socketIndex);
-void DestroySession(int socketIndex);
+
+void Cleanup();

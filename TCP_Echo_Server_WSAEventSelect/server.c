@@ -7,12 +7,13 @@ int           socketCount = 0;
 WSAEVENT      eventList[WSA_MAXIMUM_WAIT_EVENTS];
 SESSION_INFO* sessionList[WSA_MAXIMUM_WAIT_EVENTS];
 
+
 int main(int argCount, char* argValues[])
 {
     WORD    wsaVersion = MAKEWORD(2, 2);
     WSADATA wsaData;
 
-    SOCKET      listeningSocket        = INVALID_SOCKET;
+
     SOCKADDR_IN listeningSocketAddress = {
         .sin_family      = LISTENING_SOCKET_FAMILY,
         .sin_port        = htons(LISTENING_SOCKET_PORT),
@@ -50,145 +51,19 @@ int main(int argCount, char* argValues[])
     }
 
 
-    listeningSocket = socket(
-        LISTENING_SOCKET_FAMILY,
-        LISTENING_SOCKET_TYPE,
-        LISTENING_SOCKET_PROTOCOL
-    );
-
-    if (listeningSocket == INVALID_SOCKET)
+    if (CreateListeningSocket(
+            &listeningSocketAddress,
+            sizeof(listeningSocketAddress)
+        )
+        != 0)
     {
-        printf("Socket creation failed with error %d\n", WSAGetLastError());
-
-
-        WSACleanup();
-        return -1;
-    }
-    else
-    {
-        printf("Unnamed socket was created!\n");
-    }
-
-
-    int createSocketObjectResult = CreateSession(listeningSocket);
-
-    if (createSocketObjectResult != 0)
-    {
-        printf("Unnamed socket:\n");
-
-
-        int shutdownResult = shutdown(listeningSocket, SD_BOTH);
-
-        if (shutdownResult != SOCKET_ERROR)
-        {
-            printf("\tSocket was shutdown!\n");
-        }
-        else
-        {
-            printf(
-                "\tSocket shutdown error. Error code: %d!\n",
-                WSAGetLastError()
-            );
-        }
-
-
-        int closesocketResult = closesocket(listeningSocket);
-
-        if (closesocketResult != SOCKET_ERROR)
-        {
-            printf("\tSocket was closed!\n");
-        }
-        else
-        {
-            printf(
-                "\tSocket close error. Error code: %d!\n",
-                WSAGetLastError()
-            );
-        }
-
-
-        WSACleanup();
-        return -1;
-    }
-    else
-    {
-        printf("Unnamed socket information strcuture was created!\n");
-    }
-
-
-    int bindResult = bind(
-        listeningSocket,
-        (SOCKADDR*)&listeningSocketAddress,
-        sizeof(listeningSocketAddress)
-    );
-
-    if (bindResult == SOCKET_ERROR)
-    {
-        printf(
-            "Socket bind was unsuccessfull. Error code: %d\n",
-            WSAGetLastError()
-        );
-
-
         printf("Listening socket:\n");
-        SocketClose(socketCount - 1);
 
 
-        WSACleanup();
+        Cleanup();
+
+
         return -1;
-    }
-    else
-    {
-        printf("Socket was bound!\n");
-    }
-
-
-    int listenResult = listen(listeningSocket, WSA_MAXIMUM_WAIT_EVENTS - 1);
-
-    if (listenResult == SOCKET_ERROR)
-    {
-        printf(
-            "Socket listen was unsuccessfull. Error code: %d\n",
-            WSAGetLastError()
-        );
-
-
-        printf("Listening socket:\n");
-        SocketClose(socketCount - 1);
-
-
-        WSACleanup();
-        return -1;
-    }
-    else
-    {
-        printf("Socket was switched into listen state!\n");
-    }
-
-
-    int registerAcceptEvent = WSAEventSelect(
-        listeningSocket,
-        eventList[socketCount - 1],
-        FD_ACCEPT | FD_CLOSE
-    );
-
-    if (registerAcceptEvent == SOCKET_ERROR)
-    {
-        printf(
-            "Registering Accept Event failed with error %d\n",
-            WSAGetLastError()
-        );
-
-        printf("Listening socket:\n");
-        SocketClose(socketCount - 1);
-
-
-        WSACleanup();
-        return -1;
-    }
-    else
-    {
-        printf("Accept Event was registered!\n");
     }
 
 
@@ -253,10 +128,7 @@ int main(int argCount, char* argValues[])
         }
         else
         {
-            printf(
-                "\tEnumerated network events for socket %d!\n",
-                eventIndex
-            );
+            printf("\tEnumerated network events for socket %d!\n", eventIndex);
         }
 
 
@@ -370,14 +242,147 @@ int main(int argCount, char* argValues[])
     };
 
 
-    for (int socketIndex = 0; socketIndex < socketCount; socketIndex++)
+    Cleanup();
+
+
+    return 0;
+}
+
+int CreateListeningSocket(
+    LPSOCKADDR_IN p_listeningSocketAddress,
+    int           listeningSocketAddressLength
+)
+{
+    SOCKET listeningSocket = INVALID_SOCKET;
+
+
+    listeningSocket = socket(
+        LISTENING_SOCKET_FAMILY,
+        LISTENING_SOCKET_TYPE,
+        LISTENING_SOCKET_PROTOCOL
+    );
+
+    if (listeningSocket == INVALID_SOCKET)
     {
-        printf("Socket %d:\n", socketIndex);
-        SocketClose(socketIndex);
+        printf("Socket creation failed with error %d\n", WSAGetLastError());
+
+
+        WSACleanup();
+        return -1;
+    }
+    else
+    {
+        printf("Unnamed socket was created!\n");
     }
 
 
-    WSACleanup();
+    int createSocketObjectResult = CreateSession(listeningSocket);
+
+    if (createSocketObjectResult != 0)
+    {
+        printf("Unnamed socket:\n");
+
+
+        int shutdownResult = shutdown(listeningSocket, SD_BOTH);
+
+        if (shutdownResult != SOCKET_ERROR)
+        {
+            printf("\tSocket was shutdown!\n");
+        }
+        else
+        {
+            printf(
+                "\tSocket shutdown error. Error code: %d!\n",
+                WSAGetLastError()
+            );
+        }
+
+
+        int closesocketResult = closesocket(listeningSocket);
+
+        if (closesocketResult != SOCKET_ERROR)
+        {
+            printf("\tSocket was closed!\n");
+        }
+        else
+        {
+            printf(
+                "\tSocket close error. Error code: %d!\n",
+                WSAGetLastError()
+            );
+        }
+
+
+        return -1;
+    }
+    else
+    {
+        printf("Unnamed socket information strcuture was created!\n");
+    }
+
+
+    int bindResult = bind(
+        listeningSocket,
+        (SOCKADDR*)p_listeningSocketAddress,
+        listeningSocketAddressLength
+    );
+
+    if (bindResult == SOCKET_ERROR)
+    {
+        printf(
+            "Socket bind was unsuccessfull. Error code: %d\n",
+            WSAGetLastError()
+        );
+
+
+        return -1;
+    }
+    else
+    {
+        printf("Socket was bound!\n");
+    }
+
+
+    int listenResult = listen(listeningSocket, WSA_MAXIMUM_WAIT_EVENTS - 1);
+
+    if (listenResult == SOCKET_ERROR)
+    {
+        printf(
+            "Socket listen was unsuccessfull. Error code: %d\n",
+            WSAGetLastError()
+        );
+
+
+        return -1;
+    }
+    else
+    {
+        printf("Socket was switched into listen state!\n");
+    }
+
+
+    int registerAcceptEvent = WSAEventSelect(
+        listeningSocket,
+        eventList[socketCount - 1],
+        FD_ACCEPT | FD_CLOSE
+    );
+
+    if (registerAcceptEvent == SOCKET_ERROR)
+    {
+        printf(
+            "Registering Accept event failed with error %d\n",
+            WSAGetLastError()
+        );
+
+
+        return -1;
+    }
+    else
+    {
+        printf("Accept event was registered!\n");
+    }
+
+
     return 0;
 }
 
@@ -425,46 +430,6 @@ int CreateSession(SOCKET socketDescriptor)
     return 0;
 }
 
-void SocketClose(int socketIndex)
-{
-    int shutdownResult = shutdown(
-        sessionList[socketIndex]->socketDescriptor,
-        SD_BOTH
-    );
-
-    if (shutdownResult != SOCKET_ERROR)
-    {
-        printf("\tSocket was shutdown!\n");
-    }
-    else
-    {
-        printf(
-            "\tSocket shutdown error. Error code: %d!\n",
-            WSAGetLastError()
-        );
-    }
-
-
-    int closesocketResult = closesocket(
-        sessionList[socketIndex]->socketDescriptor
-    );
-
-    if (closesocketResult != SOCKET_ERROR)
-    {
-        printf("\tSocket was closed!\n");
-    }
-    else
-    {
-        printf("\tSocket close error. Error code: %d!\n", WSAGetLastError());
-    }
-
-
-    DestroySession(socketIndex);
-
-
-    socketCount--;
-}
-
 void DestroySession(int socketIndex)
 {
     HeapFree(GetProcessHeap(), 0, sessionList[socketIndex]);
@@ -477,6 +442,12 @@ void DestroySession(int socketIndex)
     else
     {
         printf("\tWSACloseEvent() failed!\n");
+
+
+        if (WSAGetLastError() == WSA_INVALID_HANDLE)
+        {
+            printf("\tNo event fount!\n");
+        }
     }
 
 
@@ -599,40 +570,6 @@ int SocketAccept(int eventIndex)
 
 
     return 0;
-}
-
-void SocketResolveAddress(LPSOCKADDR p_remoteAddress, DWORD remoteAddressLength)
-{
-    WCHAR remoteIpString[REMOTE_ADDRESS_STRING_MAX_SIZE + 1] = {0};
-    // + 1 is for the null terminator
-    DWORD remoteIpStringSize = REMOTE_ADDRESS_STRING_MAX_SIZE;
-    // we copy REMOTE_ADDRESS_STRING_MAX_SIZE * sizeof(WCHAR)
-    // bytes of information + NULL char
-    // WSAAddressToStringW also copies port number into the
-    // remoteIpString so REMOTE_ADDRESS_STRING_MAX_SIZE is
-    // REMOTE_IP_STRING_MAX_SIZE + 1 (: symbol) +
-    // REMOTE_PORT_STRING_MAX_SIZE this gives us 15 + 1 + 5 =
-    // 21 symbols
-
-    if (WSAAddressToStringW(
-            p_remoteAddress,
-            remoteAddressLength,
-            NULL,
-            (LPWSTR)&remoteIpString,
-            &remoteIpStringSize
-        )
-        == SOCKET_ERROR)
-    {
-        printf(
-            "\tCouldn't convert remote IP to string. "
-            "Error code: %d\n",
-            WSAGetLastError()
-        );
-    }
-    else
-    {
-        wprintf(L"\tRemote host: %s\n", remoteIpString);
-    }
 }
 
 // Receive from socket, select FD_READ, send to socket
@@ -813,4 +750,92 @@ int SocketWrite(int eventIndex)
 
 
     return 0;
+}
+
+void SocketClose(int socketIndex)
+{
+    if (sessionList[socketIndex] == NULL)
+    {
+        return;
+    }
+
+    int shutdownResult = shutdown(
+        sessionList[socketIndex]->socketDescriptor,
+        SD_BOTH
+    );
+
+    if (shutdownResult != SOCKET_ERROR)
+    {
+        printf("\tSocket was shutdown!\n");
+    }
+    else
+    {
+        printf("\tSocket shutdown error. Error code: %d!\n", WSAGetLastError());
+    }
+
+
+    int closesocketResult = closesocket(
+        sessionList[socketIndex]->socketDescriptor
+    );
+
+    if (closesocketResult != SOCKET_ERROR)
+    {
+        printf("\tSocket was closed!\n");
+    }
+    else
+    {
+        printf("\tSocket close error. Error code: %d!\n", WSAGetLastError());
+    }
+
+
+    DestroySession(socketIndex);
+
+
+    socketCount--;
+}
+
+void SocketResolveAddress(LPSOCKADDR p_remoteAddress, DWORD remoteAddressLength)
+{
+    WCHAR remoteIpString[REMOTE_ADDRESS_STRING_MAX_SIZE + 1] = {0};
+    // + 1 is for the null terminator
+    DWORD remoteIpStringSize = REMOTE_ADDRESS_STRING_MAX_SIZE;
+    // we copy REMOTE_ADDRESS_STRING_MAX_SIZE * sizeof(WCHAR)
+    // bytes of information + NULL char
+    // WSAAddressToStringW also copies port number into the
+    // remoteIpString so REMOTE_ADDRESS_STRING_MAX_SIZE is
+    // REMOTE_IP_STRING_MAX_SIZE + 1 (: symbol) +
+    // REMOTE_PORT_STRING_MAX_SIZE this gives us 15 + 1 + 5 =
+    // 21 symbols
+
+    if (WSAAddressToStringW(
+            p_remoteAddress,
+            remoteAddressLength,
+            NULL,
+            (LPWSTR)&remoteIpString,
+            &remoteIpStringSize
+        )
+        == SOCKET_ERROR)
+    {
+        printf(
+            "\tCouldn't convert remote IP to string. "
+            "Error code: %d\n",
+            WSAGetLastError()
+        );
+    }
+    else
+    {
+        wprintf(L"\tRemote host: %s\n", remoteIpString);
+    }
+}
+
+void Cleanup()
+{
+    for (int socketIndex = 0; socketIndex < socketCount; socketIndex++)
+    {
+        printf("Socket %d:\n", socketIndex);
+        SocketClose(socketIndex);
+    }
+
+
+    WSACleanup();
 }
