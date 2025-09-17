@@ -260,8 +260,6 @@ int main(int argCount, char* argValues[])
         }
 
 
-        // process FD_ACCEPT vs. FD_READ | FD_WRITE vs. FD_CLOSE events
-        // process FD_ACCEPT
         if (networkEvents.lNetworkEvents & FD_ACCEPT)
         {
             if (networkEvents.iErrorCode[FD_ACCEPT_BIT] != 0)
@@ -288,7 +286,8 @@ int main(int argCount, char* argValues[])
 
             printf("Current number of sockets: %d\n", socketCount);
         }
-        // process FD_READ: ReadSocket() -> WriteSocket()
+        // We can write to the socket since the moment of its creation so after
+        // FD_READ we call ReadSocket() -> WriteSocket()
         else if (networkEvents.lNetworkEvents & FD_READ)
         {
             if (networkEvents.iErrorCode[FD_READ_BIT] != 0)
@@ -312,14 +311,13 @@ int main(int argCount, char* argValues[])
                 // exit the loop and clean up
                 break;
             }
-            
-            if (SocketWrite(eventIndex)  != 0)
+
+            if (SocketWrite(eventIndex) != 0)
             {
                 // exit the loop and clean up
                 break;
             }
         }
-        // process FD_WRITE
         else if (networkEvents.lNetworkEvents & FD_WRITE)
         {
             if (networkEvents.iErrorCode[FD_WRITE_BIT] != 0)
@@ -345,7 +343,6 @@ int main(int argCount, char* argValues[])
                 break;
             }
         }
-        // process FD_CLOSE
         else if (networkEvents.lNetworkEvents & FD_CLOSE)
         {
             if (networkEvents.iErrorCode[FD_CLOSE_BIT] != 0)
@@ -579,7 +576,7 @@ int SocketAccept(int eventIndex)
     int registerConnectionSocket = WSAEventSelect(
         sessionList[socketCount - 1]->socketDescriptor,
         eventList[socketCount - 1],
-        FD_WRITE | FD_CLOSE
+        FD_READ | FD_CLOSE
     );
 
     if (registerConnectionSocket == SOCKET_ERROR)
@@ -727,7 +724,8 @@ int SocketWrite(int eventIndex)
         {
             printf("    WSASend() failed with error %d\n", WSAGetLastError());
         }
-        else if (WSAGetLastError() == WSAEWOULDBLOCK)
+        else if ((wsaSendResult == SOCKET_ERROR)
+                 && (WSAGetLastError() == WSAEWOULDBLOCK))
         {
             printf(
                 "    WSASend() returned WSAEWOULDBLOCK. The send operation "
