@@ -454,9 +454,18 @@ void DestroySession(int socketIndex)
     for (int elementIndex = socketIndex; elementIndex < socketCount;
          elementIndex++)
     {
-        eventList[elementIndex] = eventList[elementIndex + 1];
+        if (elementIndex == (socketCount - 1))
+        {
+            eventList[elementIndex] = NULL;
 
-        sessionList[elementIndex] = sessionList[elementIndex + 1];
+            sessionList[elementIndex] = NULL;
+        }
+        else
+        {
+            eventList[elementIndex] = eventList[elementIndex + 1];
+
+            sessionList[elementIndex] = sessionList[elementIndex + 1];
+        }
     }
 }
 
