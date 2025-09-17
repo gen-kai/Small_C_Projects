@@ -81,12 +81,12 @@ int main(int argCount, char* argValues[])
 
         if (shutdownResult != SOCKET_ERROR)
         {
-            printf("    Socket was shutdown!\n");
+            printf("\tSocket was shutdown!\n");
         }
         else
         {
             printf(
-                "    Socket shutdown error. Error code: %d!\n",
+                "\tSocket shutdown error. Error code: %d!\n",
                 WSAGetLastError()
             );
         }
@@ -96,12 +96,12 @@ int main(int argCount, char* argValues[])
 
         if (closesocketResult != SOCKET_ERROR)
         {
-            printf("    Socket was closed!\n");
+            printf("\tSocket was closed!\n");
         }
         else
         {
             printf(
-                "    Socket close error. Error code: %d!\n",
+                "\tSocket close error. Error code: %d!\n",
                 WSAGetLastError()
             );
         }
@@ -112,7 +112,7 @@ int main(int argCount, char* argValues[])
     }
     else
     {
-        printf("Unnamed socket information object was created!\n");
+        printf("Unnamed socket information strcuture was created!\n");
     }
 
 
@@ -237,7 +237,7 @@ int main(int argCount, char* argValues[])
         if (wsaEnumNetworkEventsResult == SOCKET_ERROR)
         {
             printf(
-                "    WSAEnumNetworkEvents() failed with error %d\n",
+                "\tWSAEnumNetworkEvents() failed with error %d\n",
                 WSAGetLastError()
             );
 
@@ -254,7 +254,7 @@ int main(int argCount, char* argValues[])
         else
         {
             printf(
-                "    Enumerated network events for socket %d!\n",
+                "\tEnumerated network events for socket %d!\n",
                 eventIndex
             );
         }
@@ -265,7 +265,7 @@ int main(int argCount, char* argValues[])
             if (networkEvents.iErrorCode[FD_ACCEPT_BIT] != 0)
             {
                 printf(
-                    "    FD_ACCEPT failed with error %d\n",
+                    "\tFD_ACCEPT failed with error %d\n",
                     networkEvents.iErrorCode[FD_ACCEPT_BIT]
                 );
 
@@ -274,7 +274,7 @@ int main(int argCount, char* argValues[])
             }
             else
             {
-                printf("    FD_ACCEPT was successful!\n");
+                printf("\tFD_ACCEPT was successful!\n");
             }
 
 
@@ -293,7 +293,7 @@ int main(int argCount, char* argValues[])
             if (networkEvents.iErrorCode[FD_READ_BIT] != 0)
             {
                 printf(
-                    "    FD_READ failed with error %d\n",
+                    "\tFD_READ failed with error %d\n",
                     networkEvents.iErrorCode[FD_READ_BIT]
                 );
 
@@ -303,7 +303,7 @@ int main(int argCount, char* argValues[])
             }
             else
             {
-                printf("    FD_READ was successful!\n");
+                printf("\tFD_READ was successful!\n");
             }
 
             if (SocketRead(eventIndex) != 0)
@@ -323,7 +323,7 @@ int main(int argCount, char* argValues[])
             if (networkEvents.iErrorCode[FD_WRITE_BIT] != 0)
             {
                 printf(
-                    "    FD_WRITE failed with error %d\n",
+                    "\tFD_WRITE failed with error %d\n",
                     networkEvents.iErrorCode[FD_WRITE_BIT]
                 );
 
@@ -333,7 +333,7 @@ int main(int argCount, char* argValues[])
             }
             else
             {
-                printf("    FD_WRITE was successful!\n");
+                printf("\tFD_WRITE was successful!\n");
             }
 
 
@@ -348,7 +348,7 @@ int main(int argCount, char* argValues[])
             if (networkEvents.iErrorCode[FD_CLOSE_BIT] != 0)
             {
                 printf(
-                    "    FD_CLOSE failed with error %d\n",
+                    "\tFD_CLOSE failed with error %d\n",
                     networkEvents.iErrorCode[FD_CLOSE_BIT]
                 );
 
@@ -358,7 +358,7 @@ int main(int argCount, char* argValues[])
             }
             else
             {
-                printf("    FD_CLOSE was successful!\n");
+                printf("\tFD_CLOSE was successful!\n");
             }
 
 
@@ -388,7 +388,7 @@ int CreateSession(SOCKET socketDescriptor)
     if (newWSAEvent == WSA_INVALID_EVENT)
     {
         printf(
-            "    Event creation for socket failed with error %d\n",
+            "\tEvent creation for socket failed with error %d\n",
             WSAGetLastError()
         );
 
@@ -407,7 +407,7 @@ int CreateSession(SOCKET socketDescriptor)
 
     if (p_sessionInfo == NULL)
     {
-        printf("    Creation of the socket object failed!\n");
+        printf("\tCreation of the SESSION_INFO structure failed!\n");
 
 
         return -1;
@@ -434,12 +434,12 @@ void SocketClose(int socketIndex)
 
     if (shutdownResult != SOCKET_ERROR)
     {
-        printf("    Socket was shutdown!\n");
+        printf("\tSocket was shutdown!\n");
     }
     else
     {
         printf(
-            "    Socket shutdown error. Error code: %d!\n",
+            "\tSocket shutdown error. Error code: %d!\n",
             WSAGetLastError()
         );
     }
@@ -451,11 +451,11 @@ void SocketClose(int socketIndex)
 
     if (closesocketResult != SOCKET_ERROR)
     {
-        printf("    Socket was closed!\n");
+        printf("\tSocket was closed!\n");
     }
     else
     {
-        printf("    Socket close error. Error code: %d!\n", WSAGetLastError());
+        printf("\tSocket close error. Error code: %d!\n", WSAGetLastError());
     }
 
 
@@ -472,11 +472,11 @@ void DestroySession(int socketIndex)
 
     if (WSACloseEvent(eventList[socketIndex]) == TRUE)
     {
-        printf("    WSACloseEvent() was successful!\n");
+        printf("\tWSACloseEvent() was successful!\n");
     }
     else
     {
-        printf("    WSACloseEvent() failed!\n");
+        printf("\tWSACloseEvent() failed!\n");
     }
 
 
@@ -497,7 +497,7 @@ int SocketAccept(int eventIndex)
 
     if (socketCount >= WSA_MAXIMUM_WAIT_EVENTS)
     {
-        printf("    Too many connections, continue with the next event!\n");
+        printf("\tToo many connections, continue with the next event!\n");
 
         return 0;
     }
@@ -512,7 +512,7 @@ int SocketAccept(int eventIndex)
     if (connectionSocket == INVALID_SOCKET)
     {
         printf(
-            "    Connection accept on socket %d was unsuccessfull. "
+            "\tConnection accept on socket %d was unsuccessfull. "
             "Error code: %d\n",
             eventIndex,
             WSAGetLastError()
@@ -523,7 +523,7 @@ int SocketAccept(int eventIndex)
     }
     else
     {
-        printf("    New connection established!\n");
+        printf("\tNew connection established!\n");
 
 
         SocketResolveAddress(&remoteAddress, remoteAddressLength);
@@ -541,12 +541,12 @@ int SocketAccept(int eventIndex)
 
         if (shutdownResult != SOCKET_ERROR)
         {
-            printf("    Socket was shutdown!\n");
+            printf("\tSocket was shutdown!\n");
         }
         else
         {
             printf(
-                "    Socket shutdown error. Error code: %d!\n",
+                "\tSocket shutdown error. Error code: %d!\n",
                 WSAGetLastError()
             );
         }
@@ -556,12 +556,12 @@ int SocketAccept(int eventIndex)
 
         if (closesocketResult != SOCKET_ERROR)
         {
-            printf("    Socket was closed!\n");
+            printf("\tSocket was closed!\n");
         }
         else
         {
             printf(
-                "    Socket close error. Error code: %d!\n",
+                "\tSocket close error. Error code: %d!\n",
                 WSAGetLastError()
             );
         }
@@ -570,7 +570,7 @@ int SocketAccept(int eventIndex)
         return -1;
     }
 
-    printf("    Connection socket information object was created!\n");
+    printf("\tConnection socket information structure was created!\n");
 
 
     int registerConnectionSocket = WSAEventSelect(
@@ -582,7 +582,7 @@ int SocketAccept(int eventIndex)
     if (registerConnectionSocket == SOCKET_ERROR)
     {
         printf(
-            "    Registering connection socket failed with error %d\n",
+            "\tRegistering connection socket failed with error %d\n",
             WSAGetLastError()
         );
 
@@ -594,7 +594,7 @@ int SocketAccept(int eventIndex)
     }
     else
     {
-        printf("    Connection socket was registered!\n");
+        printf("\tConnection socket was registered!\n");
     }
 
 
@@ -624,14 +624,14 @@ void SocketResolveAddress(LPSOCKADDR p_remoteAddress, DWORD remoteAddressLength)
         == SOCKET_ERROR)
     {
         printf(
-            "    Couldn't convert remote IP to string. "
+            "\tCouldn't convert remote IP to string. "
             "Error code: %d\n",
             WSAGetLastError()
         );
     }
     else
     {
-        wprintf(L"    Remote host: %s\n", remoteIpString);
+        wprintf(L"\tRemote host: %s\n", remoteIpString);
     }
 }
 
@@ -654,7 +654,7 @@ int SocketRead(int eventIndex)
 
         if (wsaRecvResult == SOCKET_ERROR)
         {
-            printf("    WSARecv() failed with error %d\n", WSAGetLastError());
+            printf("\tWSARecv() failed with error %d\n", WSAGetLastError());
 
 
             return -1;
@@ -662,7 +662,7 @@ int SocketRead(int eventIndex)
         else
         {
             printf(
-                "    WSARecv() was successful. Received %d bytes!\n",
+                "\tWSARecv() was successful. Received %d bytes!\n",
                 sessionList[eventIndex]->dataBufferBytesOccupied
             );
         }
@@ -681,7 +681,7 @@ int SocketRead(int eventIndex)
         if (registerWriteEvent == SOCKET_ERROR)
         {
             printf(
-                "    Registering FD_WRITE event after FD_READ failed with "
+                "\tRegistering FD_WRITE event after FD_READ failed with "
                 "error %d\n",
                 WSAGetLastError()
             );
@@ -691,7 +691,7 @@ int SocketRead(int eventIndex)
         }
         else
         {
-            printf("    The next event after FD_READ was registered!\n");
+            printf("\tThe next event after FD_READ was registered!\n");
         }
     }
 
@@ -722,19 +722,19 @@ int SocketWrite(int eventIndex)
         if ((wsaSendResult == SOCKET_ERROR)
             && (WSAGetLastError() != WSAEWOULDBLOCK))
         {
-            printf("    WSASend() failed with error %d\n", WSAGetLastError());
+            printf("\tWSASend() failed with error %d\n", WSAGetLastError());
         }
         else if ((wsaSendResult == SOCKET_ERROR)
                  && (WSAGetLastError() == WSAEWOULDBLOCK))
         {
             printf(
-                "    WSASend() returned WSAEWOULDBLOCK. The send operation "
+                "\tWSASend() returned WSAEWOULDBLOCK. The send operation "
                 "cannot be completed immediately! Rescheduling..."
             );
         }
         else
         {
-            printf("    WSASend() was successful. Sent %d bytes!\n", bytesSent);
+            printf("\tWSASend() was successful. Sent %d bytes!\n", bytesSent);
         }
 
 
@@ -766,7 +766,7 @@ int SocketWrite(int eventIndex)
         if (registerNextEvent == SOCKET_ERROR)
         {
             printf(
-                "    Registering the next event after FD_WRITE failed with "
+                "\tRegistering the next event after FD_WRITE failed with "
                 "error %d\n",
                 WSAGetLastError()
             );
@@ -778,11 +778,11 @@ int SocketWrite(int eventIndex)
         {
             if (networkEventsToRegister & FD_READ == FD_READ)
             {
-                printf("    FD_READ event after FD_WRITE was registered!\n");
+                printf("\tFD_READ event after FD_WRITE was registered!\n");
             }
             else
             {
-                printf("    FD_WRITE event after FD_WRITE was registered!\n");
+                printf("\tFD_WRITE event after FD_WRITE was registered!\n");
             }
         }
     }
@@ -797,7 +797,7 @@ int SocketWrite(int eventIndex)
         if (registerNextEvent == SOCKET_ERROR)
         {
             printf(
-                "    Registering FD_READ event after FD_WRITE failed with "
+                "\tRegistering FD_READ event after FD_WRITE failed with "
                 "error %d\n",
                 WSAGetLastError()
             );
@@ -807,7 +807,7 @@ int SocketWrite(int eventIndex)
         }
         else
         {
-            printf("    FD_READ event after FD_WRITE was registered!\n");
+            printf("\tFD_READ event after FD_WRITE was registered!\n");
         }
     }
 
