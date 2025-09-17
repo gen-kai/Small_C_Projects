@@ -30,7 +30,7 @@ typedef struct
     WSABUF wsaBufStructure;
 } SESSION_INFO;
 
-int  CreateSocketObject(SOCKET socketDescriptor);
+int  CreateSession(SOCKET socketDescriptor);
 int  SocketAccept(int socketIndex);
 int  SocketRead(int eventIndex);
 int  SocketWrite(int eventIndex);
@@ -39,4 +39,4 @@ void SocketResolveAddress(
     DWORD      remoteAddressLength
 );
 void SocketClose(int socketIndex);
-void FreeSocketObject(int socketIndex);
+void DestroySession(int socketIndex);

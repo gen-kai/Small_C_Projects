@@ -29,7 +29,7 @@ int main(int argCount, char* argValues[])
         printf("WSA Startup failed with error %d\n", wsaStartupResult);
 
 
-        return 1;
+        return -1;
     }
 
     if (LOBYTE(wsaData.wVersion) != 2 || HIBYTE(wsaData.wVersion) != 2)
@@ -38,7 +38,7 @@ int main(int argCount, char* argValues[])
 
 
         WSACleanup();
-        return 2;
+        return -1;
     }
     else
     {
@@ -62,7 +62,7 @@ int main(int argCount, char* argValues[])
 
 
         WSACleanup();
-        return 3;
+        return -1;
     }
     else
     {
@@ -70,9 +70,9 @@ int main(int argCount, char* argValues[])
     }
 
 
-    int createSocketObjectResult = CreateSocketObject(listeningSocket);
+    int createSocketObjectResult = CreateSession(listeningSocket);
 
-    if (createSocketObjectResult == 4)
+    if (createSocketObjectResult != 0)
     {
         printf("Unnamed socket:\n");
 
@@ -108,45 +108,7 @@ int main(int argCount, char* argValues[])
 
 
         WSACleanup();
-        return 4;
-    }
-    else if (createSocketObjectResult == 5)
-    {
-        printf("Unnamed socket:\n");
-
-
-        int shutdownResult = shutdown(listeningSocket, SD_BOTH);
-
-        if (shutdownResult != SOCKET_ERROR)
-        {
-            printf("    Socket was shutdown!\n");
-        }
-        else
-        {
-            printf(
-                "    Socket shutdown error. Error code: %d!\n",
-                WSAGetLastError()
-            );
-        }
-
-
-        int closesocketResult = closesocket(listeningSocket);
-
-        if (closesocketResult != SOCKET_ERROR)
-        {
-            printf("    Socket was closed!\n");
-        }
-        else
-        {
-            printf(
-                "    Socket close error. Error code: %d!\n",
-                WSAGetLastError()
-            );
-        }
-
-
-        WSACleanup();
-        return 5;
+        return -1;
     }
     else
     {
@@ -173,7 +135,7 @@ int main(int argCount, char* argValues[])
 
 
         WSACleanup();
-        return 6;
+        return -1;
     }
     else
     {
@@ -196,7 +158,7 @@ int main(int argCount, char* argValues[])
 
 
         WSACleanup();
-        return 7;
+        return -1;
     }
     else
     {
@@ -222,7 +184,7 @@ int main(int argCount, char* argValues[])
 
 
         WSACleanup();
-        return 8;
+        return -1;
     }
     else
     {
@@ -255,8 +217,7 @@ int main(int argCount, char* argValues[])
             }
 
 
-            WSACleanup();
-            return 9;
+            break;
         }
         else
         {
@@ -288,8 +249,7 @@ int main(int argCount, char* argValues[])
             }
 
 
-            WSACleanup();
-            return 10;
+            break;
         }
         else
         {
@@ -320,9 +280,7 @@ int main(int argCount, char* argValues[])
             }
 
 
-            int acceptResult = SocketAccept(eventIndex);
-
-            if (acceptResult != 0)
+            if (SocketAccept(eventIndex) != 0)
             {
                 continue;
             }
@@ -330,7 +288,7 @@ int main(int argCount, char* argValues[])
 
             printf("Current number of sockets: %d\n", socketCount);
         }
-        // process FD_READ
+        // process FD_READ: ReadSocket() -> WriteSocket()
         else if (networkEvents.lNetworkEvents & FD_READ)
         {
             if (networkEvents.iErrorCode[FD_READ_BIT] != 0)
@@ -349,9 +307,13 @@ int main(int argCount, char* argValues[])
                 printf("    FD_READ was successful!\n");
             }
 
-            int readResult = SocketRead(eventIndex);
-
-            if (readResult != 0)
+            if (SocketRead(eventIndex) != 0)
+            {
+                // exit the loop and clean up
+                break;
+            }
+            
+            if (SocketWrite(eventIndex)  != 0)
             {
                 // exit the loop and clean up
                 break;
@@ -377,9 +339,7 @@ int main(int argCount, char* argValues[])
             }
 
 
-            int writeResult = SocketWrite(eventIndex);
-
-            if (writeResult != 0)
+            if (SocketWrite(eventIndex) != 0)
             {
                 // exit the loop and clean up
                 break;
@@ -424,7 +384,7 @@ int main(int argCount, char* argValues[])
     return 0;
 }
 
-int CreateSocketObject(SOCKET socketDescriptor)
+int CreateSession(SOCKET socketDescriptor)
 {
     WSAEVENT newWSAEvent = WSACreateEvent();
 
@@ -436,34 +396,34 @@ int CreateSocketObject(SOCKET socketDescriptor)
         );
 
 
-        return 4;
+        return -1;
     }
 
     eventList[socketCount] = newWSAEvent;
 
 
-    SESSION_INFO* p_socketObject = HeapAlloc(
+    SESSION_INFO* p_sessionInfo = HeapAlloc(
         GetProcessHeap(),
         HEAP_ZERO_MEMORY,
         sizeof(SESSION_INFO)
     );
 
-    if (p_socketObject == NULL)
+    if (p_sessionInfo == NULL)
     {
         printf("    Creation of the socket object failed!\n");
 
 
-        return 5;
+        return -1;
     }
 
 
-    p_socketObject->socketDescriptor        = socketDescriptor;
-    p_socketObject->dataBufferBytesOccupied = 0;
-    p_socketObject->wsaBufStructure.buf     = p_socketObject->dataBuffer;
-    p_socketObject->wsaBufStructure.len     = DEFAULT_BUFFER_SIZE;
+    p_sessionInfo->socketDescriptor        = socketDescriptor;
+    p_sessionInfo->dataBufferBytesOccupied = 0;
+    p_sessionInfo->wsaBufStructure.buf     = p_sessionInfo->dataBuffer;
+    p_sessionInfo->wsaBufStructure.len     = DEFAULT_BUFFER_SIZE;
 
 
-    sessionList[socketCount] = p_socketObject;
+    sessionList[socketCount] = p_sessionInfo;
     socketCount++;
     return 0;
 }
@@ -502,13 +462,13 @@ void SocketClose(int socketIndex)
     }
 
 
-    FreeSocketObject(socketIndex);
+    DestroySession(socketIndex);
 
 
     socketCount--;
 }
 
-void FreeSocketObject(int socketIndex)
+void DestroySession(int socketIndex)
 {
     HeapFree(GetProcessHeap(), 0, sessionList[socketIndex]);
 
@@ -562,7 +522,7 @@ int SocketAccept(int eventIndex)
         );
 
 
-        return 1;
+        return -1;
     }
     else
     {
@@ -573,9 +533,9 @@ int SocketAccept(int eventIndex)
     }
 
 
-    int createSocketObjectResult = CreateSocketObject(connectionSocket);
+    int createSocketObjectResult = CreateSession(connectionSocket);
 
-    if (createSocketObjectResult == 4)
+    if (createSocketObjectResult != 0)
     {
         printf("Connection socket:\n");
 
@@ -610,44 +570,7 @@ int SocketAccept(int eventIndex)
         }
 
 
-        return 2;
-    }
-    else if (createSocketObjectResult == 5)
-    {
-        printf("Connection socket:\n");
-
-
-        int shutdownResult = shutdown(connectionSocket, SD_BOTH);
-
-        if (shutdownResult != SOCKET_ERROR)
-        {
-            printf("    Socket was shutdown!\n");
-        }
-        else
-        {
-            printf(
-                "    Socket shutdown error. Error code: %d!\n",
-                WSAGetLastError()
-            );
-        }
-
-
-        int closesocketResult = closesocket(connectionSocket);
-
-        if (closesocketResult != SOCKET_ERROR)
-        {
-            printf("    Socket was closed!\n");
-        }
-        else
-        {
-            printf(
-                "    Socket close error. Error code: %d!\n",
-                WSAGetLastError()
-            );
-        }
-
-
-        return 3;
+        return -1;
     }
 
     printf("    Connection socket information object was created!\n");
@@ -670,7 +593,7 @@ int SocketAccept(int eventIndex)
         SocketClose(socketCount - 1);
 
 
-        return 4;
+        return -1;
     }
     else
     {
@@ -737,7 +660,7 @@ int SocketRead(int eventIndex)
             printf("    WSARecv() failed with error %d\n", WSAGetLastError());
 
 
-            return 1;
+            return -1;
         }
         else
         {
@@ -767,18 +690,12 @@ int SocketRead(int eventIndex)
             );
 
 
-            return 2;
+            return -1;
         }
         else
         {
             printf("    The next event after FD_READ was registered!\n");
         }
-    }
-
-
-    if (SocketWrite(eventIndex) != 0)
-    {
-        return 3;
     }
 
 
@@ -857,7 +774,7 @@ int SocketWrite(int eventIndex)
             );
 
 
-            return 2;
+            return -1;
         }
         else
         {
@@ -888,7 +805,7 @@ int SocketWrite(int eventIndex)
             );
 
 
-            return 3;
+            return -1;
         }
         else
         {
