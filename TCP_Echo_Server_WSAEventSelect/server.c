@@ -3,9 +3,9 @@
 #include "server.h"
 
 
-int            socketCount = 0;
-WSAEVENT       eventList[WSA_MAXIMUM_WAIT_EVENTS];
-SOCKET_OBJECT* socketList[WSA_MAXIMUM_WAIT_EVENTS];
+int           socketCount = 0;
+WSAEVENT      eventList[WSA_MAXIMUM_WAIT_EVENTS];
+SESSION_INFO* sessionList[WSA_MAXIMUM_WAIT_EVENTS];
 
 int main(int argCount, char* argValues[])
 {
@@ -268,7 +268,7 @@ int main(int argCount, char* argValues[])
 
 
         int wsaEnumNetworkEventsResult = WSAEnumNetworkEvents(
-            socketList[eventIndex]->socketDescriptor,
+            sessionList[eventIndex]->socketDescriptor,
             eventList[eventIndex],
             &networkEvents
         );
@@ -442,10 +442,10 @@ int CreateSocketObject(SOCKET socketDescriptor)
     eventList[socketCount] = newWSAEvent;
 
 
-    SOCKET_OBJECT* p_socketObject = HeapAlloc(
+    SESSION_INFO* p_socketObject = HeapAlloc(
         GetProcessHeap(),
         HEAP_ZERO_MEMORY,
-        sizeof(SOCKET_OBJECT)
+        sizeof(SESSION_INFO)
     );
 
     if (p_socketObject == NULL)
@@ -463,7 +463,7 @@ int CreateSocketObject(SOCKET socketDescriptor)
     p_socketObject->wsaBufStructure.len     = DEFAULT_BUFFER_SIZE;
 
 
-    socketList[socketCount] = p_socketObject;
+    sessionList[socketCount] = p_socketObject;
     socketCount++;
     return 0;
 }
@@ -471,7 +471,7 @@ int CreateSocketObject(SOCKET socketDescriptor)
 void SocketClose(int socketIndex)
 {
     int shutdownResult = shutdown(
-        socketList[socketIndex]->socketDescriptor,
+        sessionList[socketIndex]->socketDescriptor,
         SD_BOTH
     );
 
@@ -489,7 +489,7 @@ void SocketClose(int socketIndex)
 
 
     int closesocketResult = closesocket(
-        socketList[socketIndex]->socketDescriptor
+        sessionList[socketIndex]->socketDescriptor
     );
 
     if (closesocketResult != SOCKET_ERROR)
@@ -510,7 +510,7 @@ void SocketClose(int socketIndex)
 
 void FreeSocketObject(int socketIndex)
 {
-    HeapFree(GetProcessHeap(), 0, socketList[socketIndex]);
+    HeapFree(GetProcessHeap(), 0, sessionList[socketIndex]);
 
 
     if (WSACloseEvent(eventList[socketIndex]) == TRUE)
@@ -528,7 +528,7 @@ void FreeSocketObject(int socketIndex)
     {
         eventList[elementIndex] = eventList[elementIndex + 1];
 
-        socketList[elementIndex] = socketList[elementIndex + 1];
+        sessionList[elementIndex] = sessionList[elementIndex + 1];
     }
 }
 
@@ -547,7 +547,7 @@ int SocketAccept(int eventIndex)
 
 
     SOCKET connectionSocket = accept(
-        socketList[eventIndex]->socketDescriptor,
+        sessionList[eventIndex]->socketDescriptor,
         &remoteAddress,
         &remoteAddressLength
     );
@@ -654,7 +654,7 @@ int SocketAccept(int eventIndex)
 
 
     int registerConnectionSocket = WSAEventSelect(
-        socketList[socketCount - 1]->socketDescriptor,
+        sessionList[socketCount - 1]->socketDescriptor,
         eventList[socketCount - 1],
         FD_WRITE | FD_CLOSE
     );
@@ -720,13 +720,13 @@ int SocketRead(int eventIndex)
 {
     // READ from socket, set buffer bytes occupied, select FD_WRITE
     DWORD recvFlags = 0;
-    if (socketList[eventIndex]->dataBufferBytesOccupied == 0)
+    if (sessionList[eventIndex]->dataBufferBytesOccupied == 0)
     {
         int wsaRecvResult = WSARecv(
-            socketList[eventIndex]->socketDescriptor,
-            &(socketList[eventIndex]->wsaBufStructure),
+            sessionList[eventIndex]->socketDescriptor,
+            &(sessionList[eventIndex]->wsaBufStructure),
             1,
-            &(socketList[eventIndex]->dataBufferBytesOccupied),
+            &(sessionList[eventIndex]->dataBufferBytesOccupied),
             &recvFlags,
             NULL,
             NULL
@@ -743,17 +743,17 @@ int SocketRead(int eventIndex)
         {
             printf(
                 "    WSARecv() was successful. Received %d bytes!\n",
-                socketList[eventIndex]->dataBufferBytesOccupied
+                sessionList[eventIndex]->dataBufferBytesOccupied
             );
         }
 
         // Set WSABUF length to the number of bytes recieved
-        socketList[eventIndex]->wsaBufStructure.len =
-            socketList[eventIndex]->dataBufferBytesOccupied;
+        sessionList[eventIndex]->wsaBufStructure.len =
+            sessionList[eventIndex]->dataBufferBytesOccupied;
 
 
         int registerWriteEvent = WSAEventSelect(
-            socketList[eventIndex]->socketDescriptor,
+            sessionList[eventIndex]->socketDescriptor,
             eventList[eventIndex],
             FD_READ | FD_CLOSE
         );
@@ -793,11 +793,11 @@ int SocketWrite(int eventIndex)
     DWORD bytesSent               = 0;
     long  networkEventsToRegister = 0;
 
-    if (socketList[eventIndex]->dataBufferBytesOccupied != 0)
+    if (sessionList[eventIndex]->dataBufferBytesOccupied != 0)
     {
         int wsaSendResult = WSASend(
-            socketList[eventIndex]->socketDescriptor,
-            &(socketList[eventIndex]->wsaBufStructure),
+            sessionList[eventIndex]->socketDescriptor,
+            &(sessionList[eventIndex]->wsaBufStructure),
             1,
             &bytesSent,
             sendFlags,
@@ -823,27 +823,27 @@ int SocketWrite(int eventIndex)
         }
 
 
-        socketList[eventIndex]->dataBufferBytesOccupied -= bytesSent;
+        sessionList[eventIndex]->dataBufferBytesOccupied -= bytesSent;
 
 
         // if we didn't send the whole buffer - register new write
         // event, otherwise - read and set WSABUF length to the number
         // of bytes left after WSASend
-        if ((socketList[eventIndex]->dataBufferBytesOccupied != 0)
+        if ((sessionList[eventIndex]->dataBufferBytesOccupied != 0)
             || (WSAGetLastError() == WSAEWOULDBLOCK))
         {
             networkEventsToRegister = FD_WRITE | FD_CLOSE;
-            socketList[eventIndex]->wsaBufStructure.len =
-                socketList[eventIndex]->dataBufferBytesOccupied;
+            sessionList[eventIndex]->wsaBufStructure.len =
+                sessionList[eventIndex]->dataBufferBytesOccupied;
         }
         else
         {
-            networkEventsToRegister                     = FD_READ | FD_CLOSE;
-            socketList[eventIndex]->wsaBufStructure.len = DEFAULT_BUFFER_SIZE;
+            networkEventsToRegister                      = FD_READ | FD_CLOSE;
+            sessionList[eventIndex]->wsaBufStructure.len = DEFAULT_BUFFER_SIZE;
         }
 
         int registerNextEvent = WSAEventSelect(
-            socketList[eventIndex]->socketDescriptor,
+            sessionList[eventIndex]->socketDescriptor,
             eventList[eventIndex],
             networkEventsToRegister
         );
@@ -874,7 +874,7 @@ int SocketWrite(int eventIndex)
     else
     {
         int registerNextEvent = WSAEventSelect(
-            socketList[eventIndex]->socketDescriptor,
+            sessionList[eventIndex]->socketDescriptor,
             eventList[eventIndex],
             FD_READ | FD_CLOSE
         );

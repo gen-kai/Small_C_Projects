@@ -28,7 +28,7 @@ typedef struct
     char   dataBuffer[DEFAULT_BUFFER_SIZE];
     UINT   dataBufferBytesOccupied;
     WSABUF wsaBufStructure;
-} SOCKET_OBJECT;
+} SESSION_INFO;
 
 int  CreateSocketObject(SOCKET socketDescriptor);
 int  SocketAccept(int socketIndex);
