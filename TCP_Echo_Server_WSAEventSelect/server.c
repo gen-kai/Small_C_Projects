@@ -510,7 +510,7 @@ void SocketClose(int socketIndex)
 
 void FreeSocketObject(int socketIndex)
 {
-    HeapFree(GetProcessHeap(), 0, socketList[socketCount]);
+    HeapFree(GetProcessHeap(), 0, socketList[socketIndex]);
 
 
     if (WSACloseEvent(eventList[socketIndex]) == TRUE)
@@ -785,8 +785,8 @@ int SocketRead(int eventIndex)
     return 0;
 }
 
-// Send buffer to socket, reset bytes occupied, select FD_READ if the entire
-// buffer was sent
+// Send buffer to socket; reset bytes occupied; select FD_READ if the entire
+// buffer was sent, register new FD_WRITE event if not
 int SocketWrite(int eventIndex)
 {
     DWORD sendFlags               = 0;
