@@ -8,7 +8,7 @@
 
 # Overview
 
-This repository is a compilation of my various small projects written in C (using Visual Studio).
+This repository is a compilation of my various small projects written in C (on/for Windows, using Visual Studio).
 
 # Dynamic_Memory_Allocation_For_User_Input
 
@@ -20,7 +20,7 @@ Small project that implements Direct NtCreateFile() Syscall from userland. C par
 
 # Simple_TCP_Echo_Server
 
-Simple echo server that supports 1 simultaneous connection and implemented using blocking sockets (simplest in Windows).
+Simple echo server that supports 1 simultaneous connection and implemented using blocking sockets (simplest model in Windows).
 
 # TCP_Echo_Server_WSAEventSelect
 
