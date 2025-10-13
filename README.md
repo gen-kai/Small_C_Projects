@@ -17,11 +17,13 @@ The code reads file into the buffer, reallocates the buffer if needed and prints
 
 ## NtCreateFile_Direct_Syscall
 
-Small project that implements direct NtCreateFile() syscall from userland. C part is used to prepare and pass parameters to the function that makes a syscall, MASM part is used to make a syscall.
+Small project that implements direct NtCreateFile() syscall from userland. C part is used to prepare and pass parameters to the function that makes a syscall.
+MASM part is used to make a syscall.
 
 ## NtCreateFile_Indirect_Syscall_Dbghelp
 
-Small project that implements indirect NtCreateFile() syscall from userland. C part is used to catalogue Nt* functions exported by the ntdll.dll (with the help of dbghelp.dll), find syscall number and the address of `syscall` instruction, prepare and pass parameters to the MASM function, MASM part is used to jump to the address of `syscall` instruction inside ndll.dll.
+Small project that implements indirect NtCreateFile() syscall from userland. C part is used to catalogue Nt* functions exported by the ntdll.dll (with the help of dbghelp.dll), find syscall number and the address of `syscall` instruction, prepare and pass parameters to the MASM function.
+MASM part is used to jump to the address of `syscall` instruction inside ndll.dll.
 
 ## Simple_TCP_Echo_Server
 
