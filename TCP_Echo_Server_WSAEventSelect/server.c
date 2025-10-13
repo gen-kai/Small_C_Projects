@@ -276,9 +276,9 @@ int CreateListeningSocket(
     }
 
 
-    int createSocketObjectResult = CreateSession(listeningSocket);
+    int createSessionResult = CreateSession(listeningSocket);
 
-    if (createSocketObjectResult != 0)
+    if (createSessionResult != 0)
     {
         printf("Unnamed socket:\n");
 
@@ -388,9 +388,9 @@ int CreateListeningSocket(
 
 int CreateSession(SOCKET socketDescriptor)
 {
-    WSAEVENT newWSAEvent = WSACreateEvent();
+    WSAEVENT newWsaEvent = WSACreateEvent();
 
-    if (newWSAEvent == WSA_INVALID_EVENT)
+    if (newWsaEvent == WSA_INVALID_EVENT)
     {
         printf(
             "\tEvent creation for socket failed with error %d\n",
@@ -401,7 +401,7 @@ int CreateSession(SOCKET socketDescriptor)
         return -1;
     }
 
-    eventList[socketCount] = newWSAEvent;
+    eventList[socketCount] = newWsaEvent;
 
 
     SESSION_INFO* p_sessionInfo = HeapAlloc(
@@ -510,9 +510,9 @@ int SocketAccept(int eventIndex)
     }
 
 
-    int createSocketObjectResult = CreateSession(connectionSocket);
+    int createSessionResult = CreateSession(connectionSocket);
 
-    if (createSocketObjectResult != 0)
+    if (createSessionResult != 0)
     {
         printf("Connection socket:\n");
 
@@ -586,6 +586,7 @@ int SocketRead(int eventIndex)
 {
     // READ from socket, set buffer bytes occupied, select FD_WRITE
     DWORD recvFlags = 0;
+
     if (sessionList[eventIndex]->dataBufferBytesOccupied == 0)
     {
         int wsaRecvResult = WSARecv(

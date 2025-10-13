@@ -1,6 +1,38 @@
+////////////////////////////////////////////////////////////////////////////////
+// Description:
+//
+// This program implements direct NtCreateFile syscall.
+// Actions:
+// - Get the handle of ntdll.dll
+// - Initialize the RtlInitUnicodeString function
+// - Initialize the unicode string containing file name
+// - Initialize file's ObjectAttributes
+// - Call the MASM function SyscallNtCreateFile() to make a direct syscall
+//
+// Inspirations:
+// - https://redops.at/en/blog/direct-syscalls-vs-indirect-syscalls
+// - https://www.ired.team/offensive-security/defense-evasion/using-syscalls-directly-from-visual-studio-to-bypass-avs-edrs
+//
+// End of Description
+////////////////////////////////////////////////////////////////////////////////
+
+
+////////////////////////////////////////////////////////////////////////////////
+// Include files
+//
+
 #include <windows.h>
 #include <winternl.h>
 #include "syscalls.h"
+
+//
+// End of Include files
+////////////////////////////////////////////////////////////////////////////////
+
+
+////////////////////////////////////////////////////////////////////////////////
+// main() function
+//
 
 int main(int argCount, char* argValues[])
 {
@@ -9,11 +41,13 @@ int main(int argCount, char* argValues[])
     OBJECT_ATTRIBUTES objectAttributes = {0};
     UNICODE_STRING    fileName         = {0};
 
+
     HMODULE ntdllHandle = GetModuleHandle(L"ntdll.dll");
     if (ntdllHandle == NULL)
     {
         return 1;
     }
+
 
     FARPROC RtlInitUnicodeString = GetProcAddress(
         ntdllHandle,
@@ -24,6 +58,7 @@ int main(int argCount, char* argValues[])
         return 2;
     }
 
+
     RtlInitUnicodeString(
         &fileName,
         L"\\??\\c:\\Users\\User\\Documents\\GitHub\\Small_C_Projects\\test.txt"
@@ -33,6 +68,7 @@ int main(int argCount, char* argValues[])
         return 3;
     }
 
+
     InitializeObjectAttributes(
         &objectAttributes,
         &fileName,
@@ -40,6 +76,7 @@ int main(int argCount, char* argValues[])
         NULL,
         NULL
     );
+
 
     IO_STATUS_BLOCK ioStatusBlock  = {0};
     LARGE_INTEGER   allocationSize = {0};
@@ -69,3 +106,7 @@ int main(int argCount, char* argValues[])
 
     return syscallStatus;
 }
+
+//
+// End of main() function
+////////////////////////////////////////////////////////////////////////////////
