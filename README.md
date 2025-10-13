@@ -36,10 +36,10 @@ Echo server that supports up to 63 simultaneous connections and implemented usin
 ## TODO
 - TCP_Echo_Server_Completion_Ports
   
-  Echo server with the model based on IOCP (I/O Completion Ports)
+  Echo server with the model based on IOCP (I/O Completion Ports).
 - NtCreateFile_Indirect_Syscall_Hells_Gate
 
-  Does everything NtCreateFile_Indirect_Syscall_Dbghelp does, but uses Hell's Gate technique instead of relying on dbghelp.dll
+  Does everything NtCreateFile_Indirect_Syscall_Dbghelp does, but uses Hell's Gate technique instead of relying on dbghelp.dll.
 - NtCreateFile_Indirect_Syscall_Halos_Gate
 
-  Does everything NtCreateFile_Indirect_Syscall_Hells_Gate does, but uses Halo's Gate technique to retrieve syscall numbers
+  Does everything NtCreateFile_Indirect_Syscall_Hells_Gate does, but uses Halo's Gate technique to retrieve syscall numbers.
