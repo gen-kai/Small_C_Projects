@@ -30,7 +30,8 @@
 // - https://redops.at/en/blog/direct-syscalls-vs-indirect-syscalls
 // - https://redops.at/en/blog/exploring-hells-gate
 // - https://github.com/am0nsec/HellsGate/blob/master/HellsGate/main.c
-// - https://sandsprite.com/CodeStuff/Understanding_the_Peb_Loader_Data_List.html
+// -
+// https://sandsprite.com/CodeStuff/Understanding_the_Peb_Loader_Data_List.html
 // - https://www.vergiliusproject.com/
 //
 // End of Description
@@ -233,7 +234,8 @@ static HANDLE GetNtdllBaseAddress()
 
 
     PTRIMMED_LDR_DATA_TABLE_ENTRY p_nextModule =
-        (PTRIMMED_PEB_LDR_DATA)(p_currentLdrData->inLoadOrderModuleList.Flink);
+        (PTRIMMED_LDR_DATA_TABLE_ENTRY)(p_currentLdrData->inLoadOrderModuleList
+                                            .Flink);
 
 
     while (p_nextModule != NULL)
@@ -311,7 +313,7 @@ static int GetExportedNtFunctions(
 
 
         PQWORD currentFunctionAddress =
-            (PDWORD)((QWORD)ntdllHandle + functionAddresses[functionIndex + 1]);
+            (PQWORD)((QWORD)ntdllHandle + functionAddresses[functionIndex + 1]);
 
 
         if ((currentFunctionName[0] == 'N')
@@ -352,8 +354,8 @@ static PIMAGE_EXPORT_DIRECTORY GetImageExportDirectory(HANDLE p_ntdllHandle)
     }
 
 
-    PIMAGE_NT_HEADERS p_ntdllNtHeaders = (QWORD)p_ntdllHandle
-                                         + p_ntdllDosHeader->e_lfanew;
+    PIMAGE_NT_HEADERS p_ntdllNtHeaders =
+        (PIMAGE_NT_HEADERS)((QWORD)p_ntdllHandle + p_ntdllDosHeader->e_lfanew);
     if (p_ntdllNtHeaders->Signature != IMAGE_NT_SIGNATURE)
     {
         return NULL;
@@ -361,7 +363,9 @@ static PIMAGE_EXPORT_DIRECTORY GetImageExportDirectory(HANDLE p_ntdllHandle)
 
 
     DWORD ntdllExportDirectoryRva =
-        p_ntdllNtHeaders->OptionalHeader.DataDirectory[0].VirtualAddress;
+        p_ntdllNtHeaders->OptionalHeader
+            .DataDirectory[IMAGE_DIRECTORY_ENTRY_EXPORT]
+            .VirtualAddress;
 
 
     return (PIMAGE_EXPORT_DIRECTORY)((QWORD)p_ntdllHandle
