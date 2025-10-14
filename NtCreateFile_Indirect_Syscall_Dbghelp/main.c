@@ -27,7 +27,7 @@
 // - Initialize file's ObjectAttributes
 // - Call the MASM function SyscallNtCreateFile() to make an indirect syscall
 //
-// Inspirations:
+// Inspirations/Resources:
 // - https://redops.at/en/blog/direct-syscalls-vs-indirect-syscalls
 // - https://stackoverflow.com/a/4354755
 //
@@ -271,121 +271,6 @@ int main()
 
 
 ////////////////////////////////////////////////////////////////////////////////
-// SetSyscallNumber() function
-//
-
-// This function selects the function from the function list given the function
-// name, gets the address from the structure, searches for the sequence of bytes
-// (b8 DWORD) in the range of that address until the syscall sequence (0f 05)
-// and sets the global variable syscallNumber to the value of the DWORD after
-// the mov instruction
-static void SetSyscallNumber(
-    function_info_t* p_functionList,
-    char*            functionName
-)
-{
-    for (DWORD functionIndex = 0; functionIndex < SYSCALL_FUNCTIONS_COUNT;
-         functionIndex++)
-    {
-        if (strcmp(p_functionList[functionIndex].functionName, functionName)
-            == 0)
-        {
-            QWORD startAddress;
-            QWORD endAddress;
-            QWORD p_syscallNumber;
-
-
-            startAddress = p_functionList[functionIndex].functionAddress;
-
-            for (endAddress = startAddress;; endAddress++)
-            {
-                if ((*(PBYTE)endAddress == syscallStub[0])
-                    && (*(PBYTE)(endAddress + 1) == syscallStub[1]))
-                {
-                    break;
-                }
-            }
-
-
-            for (QWORD currentAddress = startAddress;
-                 currentAddress < endAddress;
-                 currentAddress++)
-            {
-                if ((*(PBYTE)currentAddress == unhookedSsnStub[0])
-                    && (*(PBYTE)(currentAddress + 1) == unhookedSsnStub[1])
-                    && (*(PBYTE)(currentAddress + 2) == unhookedSsnStub[2])
-                    && (*(PBYTE)(currentAddress + 3) == unhookedSsnStub[3]))
-                {
-                    syscallNumber = *(PDWORD)(currentAddress + 4);
-
-
-                    break;
-                }
-            }
-
-
-            return;
-        }
-    }
-
-
-    syscallNumber = -1;
-}
-
-//
-// End of SetSyscallNumber() function
-////////////////////////////////////////////////////////////////////////////////
-
-
-////////////////////////////////////////////////////////////////////////////////
-// SetSyscallAddress() function
-//
-
-// This function selects the function from the function list given the function
-// name, gets the address from the structure, searches for the sequence of bytes
-// (0f 05) and sets the global variable syscallAddress to the address of the
-// first byte of the sequence
-static void SetSyscallAddress(
-    function_info_t* p_functionList,
-    char*            functionName
-)
-{
-    for (DWORD functionIndex = 0; functionIndex < SYSCALL_FUNCTIONS_COUNT;
-         functionIndex++)
-    {
-        if (strcmp(p_functionList[functionIndex].functionName, functionName)
-            == 0)
-        {
-            QWORD
-            currentAddress = p_functionList[functionIndex].functionAddress;
-
-            for (; currentAddress < currentAddress + 0x20; currentAddress++)
-            {
-                if ((*(PBYTE)currentAddress == syscallStub[0])
-                    && (*(PBYTE)(currentAddress + 1) == syscallStub[1]))
-                {
-                    syscallAddress = currentAddress;
-
-
-                    return;
-                }
-            }
-
-
-            break;
-        }
-    }
-
-
-    syscallAddress = 0;
-}
-
-//
-// End of SetSyscallAddress() function
-////////////////////////////////////////////////////////////////////////////////
-
-
-////////////////////////////////////////////////////////////////////////////////
 // GetExportedNtFunctions() function
 //
 
@@ -557,4 +442,119 @@ static int GetExportedNtFunctions(
 
 //
 // End of GetExportedNtFunctions() function
+////////////////////////////////////////////////////////////////////////////////
+
+
+////////////////////////////////////////////////////////////////////////////////
+// SetSyscallNumber() function
+//
+
+// This function selects the function from the function list given the function
+// name, gets the address from the structure, searches for the sequence of bytes
+// (b8 DWORD) in the range of that address until the syscall sequence (0f 05)
+// and sets the global variable syscallNumber to the value of the DWORD after
+// the mov instruction
+static void SetSyscallNumber(
+    function_info_t* p_functionList,
+    char*            functionName
+)
+{
+    for (DWORD functionIndex = 0; functionIndex < SYSCALL_FUNCTIONS_COUNT;
+         functionIndex++)
+    {
+        if (strcmp(p_functionList[functionIndex].functionName, functionName)
+            == 0)
+        {
+            QWORD startAddress;
+            QWORD endAddress;
+            QWORD p_syscallNumber;
+
+
+            startAddress = p_functionList[functionIndex].functionAddress;
+
+            for (endAddress = startAddress;; endAddress++)
+            {
+                if ((*(PBYTE)endAddress == syscallStub[0])
+                    && (*(PBYTE)(endAddress + 1) == syscallStub[1]))
+                {
+                    break;
+                }
+            }
+
+
+            for (QWORD currentAddress = startAddress;
+                 currentAddress < endAddress;
+                 currentAddress++)
+            {
+                if ((*(PBYTE)currentAddress == unhookedSsnStub[0])
+                    && (*(PBYTE)(currentAddress + 1) == unhookedSsnStub[1])
+                    && (*(PBYTE)(currentAddress + 2) == unhookedSsnStub[2])
+                    && (*(PBYTE)(currentAddress + 3) == unhookedSsnStub[3]))
+                {
+                    syscallNumber = *(PDWORD)(currentAddress + 4);
+
+
+                    break;
+                }
+            }
+
+
+            return;
+        }
+    }
+
+
+    syscallNumber = -1;
+}
+
+//
+// End of SetSyscallNumber() function
+////////////////////////////////////////////////////////////////////////////////
+
+
+////////////////////////////////////////////////////////////////////////////////
+// SetSyscallAddress() function
+//
+
+// This function selects the function from the function list given the function
+// name, gets the address from the structure, searches for the sequence of bytes
+// (0f 05) and sets the global variable syscallAddress to the address of the
+// first byte of the sequence
+static void SetSyscallAddress(
+    function_info_t* p_functionList,
+    char*            functionName
+)
+{
+    for (DWORD functionIndex = 0; functionIndex < SYSCALL_FUNCTIONS_COUNT;
+         functionIndex++)
+    {
+        if (strcmp(p_functionList[functionIndex].functionName, functionName)
+            == 0)
+        {
+            QWORD
+            currentAddress = p_functionList[functionIndex].functionAddress;
+
+            for (; currentAddress < currentAddress + 0x20; currentAddress++)
+            {
+                if ((*(PBYTE)currentAddress == syscallStub[0])
+                    && (*(PBYTE)(currentAddress + 1) == syscallStub[1]))
+                {
+                    syscallAddress = currentAddress;
+
+
+                    return;
+                }
+            }
+
+
+            break;
+        }
+    }
+
+
+    syscallAddress = 0;
+}
+
+//
+// End of SetSyscallAddress() function
 ////////////////////////////////////////////////////////////////////////////////
