@@ -30,8 +30,7 @@
 // - https://redops.at/en/blog/direct-syscalls-vs-indirect-syscalls
 // - https://redops.at/en/blog/exploring-hells-gate
 // - https://github.com/am0nsec/HellsGate/blob/master/HellsGate/main.c
-// -
-// https://sandsprite.com/CodeStuff/Understanding_the_Peb_Loader_Data_List.html
+// - https://sandsprite.com/CodeStuff/Understanding_the_Peb_Loader_Data_List.html
 // - https://www.vergiliusproject.com/
 //
 // End of Description
