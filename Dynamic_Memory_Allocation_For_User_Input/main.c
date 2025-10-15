@@ -49,8 +49,10 @@ int main(int argCount, char* argValues[])
 
 
     printf("Your input: %s\n", userInput.p_inputBuffer);
-    printf("Your input's length: %ju\n",
-           strnlen(userInput.p_inputBuffer, userInput.bufferSize));
+    printf(
+        "Your input's length: %ju\n",
+        strnlen(userInput.p_inputBuffer, userInput.bufferSize)
+    );
     printf("Input buffer length: %u\n", userInput.bufferSize);
 
 
