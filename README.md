@@ -2,9 +2,10 @@
 - [Overview](#overview)
 - [Dynamic_Memory_Allocation_For_User_Input](#dynamic_memory_allocation_for_user_input)
 - [NtCreateFile_Direct_Syscall](#ntcreatefile_direct_syscall)
-- [NtCreateFile_Indirect_Syscall_Dbghelp](#ntcreatefile_direct_syscall_dbghelp)
 - [Simple_TCP_Echo_Server](#simple_tcp_echo_server)
 - [TCP_Echo_Server_WSAEventSelect](#tcp_echo_server_wsaeventselect)
+- [NtCreateFile_Indirect_Syscall_Dbghelp](#ntcreatefile_direct_syscall_dbghelp)
+- [NtCreateFile_Indirect_Syscall_Hell's Gate](#ntcreatefile_direct_syscall_hells_gate)
 - [TODO](#todo)
 
 ## Overview
