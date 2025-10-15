@@ -39,7 +39,7 @@ MASM part is used to jump to the address of `syscall` instruction inside ntdll.d
 ## NtCreateFile_Indirect_Syscall_Hells_Gate
 
 Small project that implements indirect NtCreateFile() syscall from userland.
-C part is used to catalogue Nt* functions exported by the ntdll.dll (by walking the "TEB->PEB->ntdll base address->Export directory->Exported funccitons and their names" chain), find syscall number and the address of `syscall` instruction, prepare and pass parameters to the MASM function.
+C part is used to catalogue Nt* functions exported by the ntdll.dll (by walking the "TEB->PEB->ntdll base address->Export directory->Exported functions and their names" chain), find syscall number and the address of `syscall` instruction, prepare and pass parameters to the MASM function.
 MASM part is used to jump to the address of `syscall` instruction inside ntdll.dll.
 
 ## TODO
