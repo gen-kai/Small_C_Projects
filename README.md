@@ -17,13 +17,9 @@ The code reads file into the buffer, reallocates the buffer if needed and prints
 
 ## NtCreateFile_Direct_Syscall
 
-Small project that implements direct NtCreateFile() syscall from userland. C part is used to prepare and pass parameters to the function that makes a syscall.
+Small project that implements direct NtCreateFile() syscall from userland.
+C part is used to prepare and pass parameters to the function that makes a syscall.
 MASM part is used to make a syscall.
-
-## NtCreateFile_Indirect_Syscall_Dbghelp
-
-Small project that implements indirect NtCreateFile() syscall from userland. C part is used to catalogue Nt* functions exported by the ntdll.dll (with the help of dbghelp.dll), find syscall number and the address of `syscall` instruction, prepare and pass parameters to the MASM function.
-MASM part is used to jump to the address of `syscall` instruction inside ntdll.dll.
 
 ## Simple_TCP_Echo_Server
 
@@ -33,13 +29,22 @@ Simple echo server that supports 1 simultaneous connection and implemented using
 
 Echo server that supports up to 63 simultaneous connections and implemented using model based on WSAEventSelect.
 
+## NtCreateFile_Indirect_Syscall_Dbghelp
+
+Small project that implements indirect NtCreateFile() syscall from userland.
+C part is used to catalogue Nt* functions exported by the ntdll.dll (with the help of dbghelp.dll), find syscall number and the address of `syscall` instruction, prepare and pass parameters to the MASM function.
+MASM part is used to jump to the address of `syscall` instruction inside ntdll.dll.
+
+## NtCreateFile_Indirect_Syscall_Hells_Gate
+
+Small project that implements indirect NtCreateFile() syscall from userland.
+C part is used to catalogue Nt* functions exported by the ntdll.dll (by walking the "TEB->PEB->ntdll base address->Export directory->Exported funccitons and their names" chain), find syscall number and the address of `syscall` instruction, prepare and pass parameters to the MASM function.
+MASM part is used to jump to the address of `syscall` instruction inside ntdll.dll.
+
 ## TODO
 - TCP_Echo_Server_Completion_Ports
   
   Echo server with the model based on IOCP (I/O Completion Ports).
-- NtCreateFile_Indirect_Syscall_Hells_Gate
-
-  Does everything NtCreateFile_Indirect_Syscall_Dbghelp does, but uses Hell's Gate technique instead of relying on dbghelp.dll.
 - NtCreateFile_Indirect_Syscall_Halos_Gate
 
   Does everything NtCreateFile_Indirect_Syscall_Hells_Gate does, but uses Halo's Gate technique to retrieve syscall numbers.
